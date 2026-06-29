@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+// .env'den bilgi çekmek için: os.Getenv("SANITY_TOKEN") (os paketi gerekiyor)
 func main() {
 	err := godotenv.Load()
 	if err != nil {
