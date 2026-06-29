@@ -13,7 +13,7 @@ import (
 
 // .env'den bilgi çekmek için: os.Getenv("SANITY_TOKEN") (os paketi gerekiyor)
 func main() {
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("[HATA]: .env yüklenemedi: %v", err)
 	}
