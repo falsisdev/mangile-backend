@@ -2,11 +2,111 @@ package services
 
 import (
 	"bytes"
-	"encoding/json" //verileri json'a çevirir
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"os" //.env'den dosya çekmek için
+	"net/url"
+	"os"
+
+	"github.com/falsisdev/mangile-backend/internal/models"
 )
+
+func GetLightNovel(id string) (*models.LightNovel, error) {
+	projectID := os.Getenv("SANITY_PROJECT_ID")
+
+	query := fmt.Sprintf(`*[_type == "lightNovel" && myAnimeListId == %s][0]{
+    _id, 
+    title, 
+    description,
+    myAnimeListId,
+	_createdAt,
+	_updatedAt,
+	_type,
+	tags,
+    "bannerImage": bannerImage.asset->url,
+	"coverImage": coverImage.asset->url,
+	"chapters": chapters[]{
+		chapterNumber,
+		title,
+		"content": content
+	},
+	notes
+	}`, id)
+
+	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
+
+	u, _ := url.Parse(baseURL)
+	q := u.Query()
+	q.Set("query", query)
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var lightNovelWrapper struct {
+		Result models.LightNovel `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&lightNovelWrapper); err != nil {
+		return nil, err
+	}
+
+	return &lightNovelWrapper.Result, nil
+}
+
+func GetManga(id string) (*models.Manga, error) {
+	projectID := os.Getenv("SANITY_PROJECT_ID")
+
+	query := fmt.Sprintf(`*[_type == "manga" && myAnimeListId == %s][0]{
+    _id, 
+    title, 
+    description,
+    myAnimeListId,
+	_createdAt,
+	_updatedAt,
+	_type,
+	tags,
+    "bannerImage": bannerImage.asset->url,
+	"coverImage": coverImage.asset->url,
+	"chapters": chapters[]{
+		chapterNumber,
+		title,
+		"pages": pages[]{
+				"asset": {
+						"url": asset->url
+				}
+			}
+		}
+	},
+	notes
+	}`, id)
+
+	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
+
+	u, _ := url.Parse(baseURL)
+	q := u.Query()
+	q.Set("query", query)
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var mangaWrapper struct {
+		Result models.Manga `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&mangaWrapper); err != nil {
+		return nil, err
+	}
+
+	return &mangaWrapper.Result, nil
+}
 
 func PostToSanity(document map[string]interface{}) error {
 	projectID := os.Getenv("SANITY_PROJECT_ID")

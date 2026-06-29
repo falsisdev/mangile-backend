@@ -7,13 +7,15 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	"github.com/falsisdev/mangile-backend/internal/handlers"
 )
 
 // .env'den bilgi çekmek için: os.Getenv("SANITY_TOKEN") (os paketi gerekiyor)
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("../../.env")
 	if err != nil {
-		log.Fatal("[HATA]: .env dosyası yüklenirken bir hata oluştu.")
+		log.Fatalf("[HATA]: .env yüklenemedi: %v", err)
 	}
 
 	e := echo.New()
@@ -24,6 +26,9 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "[✅]: Sunucu başarıyla başlatıldı.")
 	})
+
+	e.GET("/api/manga/:id", handlers.GetMangaHandler)
+	e.GET("/api/lightNovel/:id", handlers.GetLightNovelHandler)
 
 	e.Logger.Fatal(e.Start(":3000"))
 }
