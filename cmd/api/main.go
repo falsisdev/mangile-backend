@@ -29,6 +29,7 @@ func main() {
 
 	e.GET("/api/manga/:id", handlers.GetMangaHandler)
 	e.GET("/api/lightNovel/:id", handlers.GetLightNovelHandler)
+	e.GET("/api/scan/:id", handlers.GetScanHandler)
 
 	e.Logger.Fatal(e.Start(":3000"))
 }
