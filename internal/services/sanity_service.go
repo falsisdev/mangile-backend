@@ -179,9 +179,111 @@ func GetScan(id string) (*models.Scan, error) {
 
 	return &scanWrapper.Result, nil
 }
+
+func GetManga(id string) (*models.Manga, error) {
+	projectID := os.Getenv("SANITY_PROJECT_ID")
+	if projectID == "" {
+		return nil, fmt.Errorf("SANITY_PROJECT_ID ortam değişkeni bulunamadı")
+	}
+
+	// 1. Sanity GROQ Sorgusu
+	query := fmt.Sprintf(`*[_type == "manga" && myAnimeListId == %s][0]{
+		_id, 
+		_type,
+		_createdAt,
+		_updatedAt,
+		myAnimeListId,
+		title, 
+		description,
+		tags,
+		"bannerImage": bannerImage.asset->url,
+		"coverImage": coverImage.asset->url,
+		"chapters": chapters[]{
+			chapterNumber,
+			title,
+			"pages": pages[]{
+				"asset": {
+					"url": asset->url
+				}
+			}
+		},
+		notes
+	}`, id)
+
+	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
+
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, err
+	}
+	q := u.Query()
+	q.Set("query", query)
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var sanityWrapper struct {
+		Result models.SanityManga `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&sanityWrapper); err != nil {
+		return nil, err
+	}
+
+	sanityData := sanityWrapper.Result
+
+	if sanityData.ID == "" {
+		return nil, fmt.Errorf("Manga bulunamadı: %s", id)
+	}
+
+	finalLightNovel := &models.Manga{
+		ID:                sanityData.ID,
+		Type:              sanityData.Type,
+		SanityTitle:       sanityData.SanityTitle,
+		SanityDescription: sanityData.SanityDescription,
+		SanityBanner:      sanityData.SanityBanner,
+		SanityCover:       sanityData.SanityCover,
+		SanityTags:        sanityData.SanityTags,
+		MalID:             sanityData.MalID,
+		Chapters:          sanityData.Chapters, // Ortak paylaşılan şema
+	}
+
+	if finalLightNovel.MalID != 0 {
+		if jikanData, err := fetchJikanMangaData(finalLightNovel.MalID); err == nil && jikanData != nil {
+			finalLightNovel.MalURL = jikanData.Data.MalURL
+			finalLightNovel.MalTitleJapanese = jikanData.Data.MalTitleJapanese
+			finalLightNovel.MalTitleEnglish = jikanData.Data.MalTitleEnglish
+			finalLightNovel.MalStatus = jikanData.Data.MalStatus
+			finalLightNovel.MalScore = jikanData.Data.MalScore
+			finalLightNovel.MalAuthors = jikanData.Data.MalAuthors
+			finalLightNovel.MalGenres = jikanData.Data.MalGenres
+			finalLightNovel.MalThemes = jikanData.Data.MalThemes
+		}
+
+		if aniListData, err := fetchAniListMangaData(finalLightNovel.MalID); err == nil && aniListData != nil {
+			media := aniListData.Data.Media
+			finalLightNovel.AniListID = media.AnilistID
+			finalLightNovel.AnilistBanner = media.AniListBanner
+			finalLightNovel.AnilistCover = media.AnilistCover.Large
+			finalLightNovel.AnilistTags = media.AnilistTags
+			finalLightNovel.AnilistTrending = media.AnilistTrending
+		}
+	}
+
+	return finalLightNovel, nil
+}
+
 func GetLightNovel(id string) (*models.LightNovel, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
+	if projectID == "" {
+		return nil, fmt.Errorf("SANITY_PROJECT_ID ortam değişkeni bulunamadı")
+	}
 
+	// 1. Sanity GROQ Sorgusu
 	query := fmt.Sprintf(`*[_type == "lightNovel" && myAnimeListId == %s][0]{
     _id, 
     title, 
@@ -203,7 +305,10 @@ func GetLightNovel(id string) (*models.LightNovel, error) {
 
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 
-	u, _ := url.Parse(baseURL)
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, err
+	}
 	q := u.Query()
 	q.Set("query", query)
 	u.RawQuery = q.Encode()
@@ -214,66 +319,172 @@ func GetLightNovel(id string) (*models.LightNovel, error) {
 	}
 	defer resp.Body.Close()
 
-	var lightNovelWrapper struct {
-		Result models.LightNovel `json:"result"`
+	var sanityWrapper struct {
+		Result models.SanityLightNovel `json:"result"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&lightNovelWrapper); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&sanityWrapper); err != nil {
 		return nil, err
 	}
 
-	return &lightNovelWrapper.Result, nil
+	sanityData := sanityWrapper.Result
+
+	if sanityData.ID == "" {
+		return nil, fmt.Errorf("Light Novel bulunamadı: %s", id)
+	}
+
+	finalLightNovel := &models.LightNovel{
+		ID:                sanityData.ID,
+		Type:              sanityData.Type,
+		SanityTitle:       sanityData.SanityTitle,
+		SanityDescription: sanityData.SanityDescription,
+		SanityBanner:      sanityData.SanityBanner,
+		SanityCover:       sanityData.SanityCover,
+		SanityTags:        sanityData.SanityTags,
+		MalID:             sanityData.MalID,
+		Chapters:          sanityData.Chapters, // Ortak paylaşılan şema
+	}
+
+	if finalLightNovel.MalID != 0 {
+		if jikanData, err := fetchJikanMangaData(finalLightNovel.MalID); err == nil && jikanData != nil {
+			finalLightNovel.MalURL = jikanData.Data.MalURL
+			finalLightNovel.MalTitleJapanese = jikanData.Data.MalTitleJapanese
+			finalLightNovel.MalTitleEnglish = jikanData.Data.MalTitleEnglish
+			finalLightNovel.MalStatus = jikanData.Data.MalStatus
+			finalLightNovel.MalScore = jikanData.Data.MalScore
+			finalLightNovel.MalAuthors = jikanData.Data.MalAuthors
+			finalLightNovel.MalGenres = jikanData.Data.MalGenres
+			finalLightNovel.MalThemes = jikanData.Data.MalThemes
+		}
+
+		if aniListData, err := fetchAniListMangaData(finalLightNovel.MalID); err == nil && aniListData != nil {
+			media := aniListData.Data.Media
+			finalLightNovel.AniListID = media.AnilistID
+			finalLightNovel.AnilistBanner = media.AniListBanner
+			finalLightNovel.AnilistCover = media.AnilistCover.Large
+			finalLightNovel.AnilistTags = media.AnilistTags
+			finalLightNovel.AnilistTrending = media.AnilistTrending
+		}
+	}
+
+	return finalLightNovel, nil
 }
 
-func GetManga(id string) (*models.Manga, error) {
-	projectID := os.Getenv("SANITY_PROJECT_ID")
+// -------------------------- FETCH MANGA --------------------------------------
+func fetchJikanMangaData(malID int) (*models.JikanMangaResponse, error) {
+	url := fmt.Sprintf("https://api.jikan.moe/v4/manga/%d", malID)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
 
-	query := fmt.Sprintf(`*[_type == "manga" && myAnimeListId == %s][0]{
-    _id, 
-    title, 
-    description,
-    myAnimeListId,
-	_createdAt,
-	_updatedAt,
-	_type,
-	tags,
-    "bannerImage": bannerImage.asset->url,
-	"coverImage": coverImage.asset->url,
-	"chapters": chapters[]{
-		chapterNumber,
-		title,
-		"pages": pages[]{
-				"asset": {
-						"url": asset->url
+	var jikanResp models.JikanMangaResponse
+	if err := json.NewDecoder(resp.Body).Decode(&jikanResp); err != nil {
+		return nil, err
+	}
+	return &jikanResp, nil
+}
+
+func fetchAniListMangaData(malID int) (*models.AniListMangaResponse, error) {
+	jsonData := map[string]string{
+		"query": fmt.Sprintf(`{
+			Media(idMal: %d, type: MANGA) {
+				id
+				trending
+				averageScore
+				bannerImage
+				coverImage {
+					large
+				}
+				description
+				tags {
+					name
 				}
 			}
-		},
-	notes
-	}`, id)
+		}`, malID),
+	}
 
-	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
+	jsonValue, _ := json.Marshal(jsonData)
+	request, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Content-Type", "application/json")
 
-	u, _ := url.Parse(baseURL)
-	q := u.Query()
-	q.Set("query", query)
-	u.RawQuery = q.Encode()
-
-	resp, err := http.Get(u.String())
+	client := &http.Client{}
+	resp, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	var mangaWrapper struct {
-		Result models.Manga `json:"result"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&mangaWrapper); err != nil {
+	var aniListResp models.AniListMangaResponse
+	if err := json.NewDecoder(resp.Body).Decode(&aniListResp); err != nil {
 		return nil, err
 	}
-
-	return &mangaWrapper.Result, nil
+	return &aniListResp, nil
 }
+
+//-------------------------- FETCH MANGA --------------------------------------
+
+// -------------------------- FETCH LIGHTNOVEL --------------------------------------
+func fetchJikanLightNovelData(malID int) (*models.JikanLightNovelResponse, error) {
+	url := fmt.Sprintf("https://api.jikan.moe/v4/manga/%d", malID)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var jikanResp models.JikanLightNovelResponse
+	if err := json.NewDecoder(resp.Body).Decode(&jikanResp); err != nil {
+		return nil, err
+	}
+	return &jikanResp, nil
+}
+
+func fetchAniListLightNovelData(malID int) (*models.AniListLightNovelResponse, error) {
+	jsonData := map[string]string{
+		"query": fmt.Sprintf(`{
+			Media(idMal: %d, type: MANGA) {
+				id
+				trending
+				averageScore
+				bannerImage
+				coverImage {
+					large
+				}
+				description
+				tags {
+					name
+				}
+			}
+		}`, malID),
+	}
+
+	jsonValue, _ := json.Marshal(jsonData)
+	request, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var aniListResp models.AniListLightNovelResponse
+	if err := json.NewDecoder(resp.Body).Decode(&aniListResp); err != nil {
+		return nil, err
+	}
+	return &aniListResp, nil
+}
+
+//-------------------------- FETCH LIGHTNOVEL --------------------------------------
 
 func PostToSanity(document map[string]interface{}) error {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
