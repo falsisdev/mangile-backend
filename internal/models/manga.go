@@ -104,4 +104,5 @@ type Manga struct {
 	MalThemes          []interface{}  `json:"mal_themes"`
 	MalURL             string         `json:"mal_url"`
 	Chapters           []MangaChapter `json:"chapters"`
+	Notes              []interface{}  `json:"notes"`
 }

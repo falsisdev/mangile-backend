@@ -95,4 +95,5 @@ type LightNovel struct {
 	MalThemes          []interface{}       `json:"mal_themes"`
 	MalURL             string              `json:"mal_url"`
 	Chapters           []LightNovelChapter `json:"chapters"`
+	Notes              []interface{}       `json:"notes"`
 }
