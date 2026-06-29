@@ -11,6 +11,65 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/models"
 )
 
+func GetUser(id string) (*models.User, error) {
+	projectID := os.Getenv("SANITY_PROJECT_ID")
+
+	query := fmt.Sprintf(`*[_type == "auth" && logtoId == "%s"][0]{
+	_id,
+	_type,
+	title,
+	_createdAt,
+	avatar,
+	"banner": banner.asset -> url,
+	bio,
+	favoriteChapters,
+	favoriteTitles,
+	favoriteTitle,
+	gender,
+	logtoId,
+	name,
+	username,
+    "lists": lists[]->{
+             _id,
+			_type,
+			title,
+			createdAt,
+			items,
+			user->{_id, logtoId, name, avatar, username},
+			"likes": likes[]->{
+					_id,
+					name,
+					avatar,
+					username,
+					logtoId
+					},
+            },
+	}`, id)
+
+	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
+
+	u, _ := url.Parse(baseURL)
+	q := u.Query()
+	q.Set("query", query)
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var userWrapper struct {
+		Result models.User `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&userWrapper); err != nil {
+		return nil, err
+	}
+
+	return &userWrapper.Result, nil
+}
+
 func GetList(id string) (*models.List, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 
