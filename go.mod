@@ -5,6 +5,7 @@ go 1.26.4
 require github.com/labstack/echo/v4 v4.15.4
 
 require (
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/labstack/gommon v0.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
