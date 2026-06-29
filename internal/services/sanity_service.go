@@ -11,6 +11,49 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/models"
 )
 
+func GetList(id string) (*models.List, error) {
+	projectID := os.Getenv("SANITY_PROJECT_ID")
+
+	query := fmt.Sprintf(`*[_type == "lists" && _id == "%s"][0]{
+	_id,
+	_type,
+	title,
+	createdAt,
+	items,
+	user->{_id, logtoId, name, avatar, username},
+    "likes": likes[]->{
+              _id,
+              name,
+              avatar,
+              username,
+              logtoId
+            },
+	}`, id)
+
+	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
+
+	u, _ := url.Parse(baseURL)
+	q := u.Query()
+	q.Set("query", query)
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var listWrapper struct {
+		Result models.List `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&listWrapper); err != nil {
+		return nil, err
+	}
+
+	return &listWrapper.Result, nil
+}
+
 func GetScan(id string) (*models.Scan, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 
@@ -38,15 +81,15 @@ func GetScan(id string) (*models.Scan, error) {
 	}
 	defer resp.Body.Close()
 
-	var ScanWrapper struct {
+	var scanWrapper struct {
 		Result models.Scan `json:"result"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&ScanWrapper); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&scanWrapper); err != nil {
 		return nil, err
 	}
 
-	return &ScanWrapper.Result, nil
+	return &scanWrapper.Result, nil
 }
 func GetLightNovel(id string) (*models.LightNovel, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
