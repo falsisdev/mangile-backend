@@ -32,6 +32,7 @@ func main() {
 	e.GET("/api/scan/:id", handlers.GetScanHandler)
 	e.GET("/api/list/:id", handlers.GetListHandler)
 	e.GET("/api/user/:id", handlers.GetUserHandler)
+	e.GET("/api/article/:slug", handlers.GetArticleHandler)
 
 	e.Logger.Fatal(e.Start(":3000"))
 }
