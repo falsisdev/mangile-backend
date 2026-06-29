@@ -15,7 +15,7 @@ func GetLightNovelHandler(c echo.Context) error {
 
 	lightNovel, err := services.GetLightNovel(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, lightNovel)

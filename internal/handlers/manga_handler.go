@@ -15,7 +15,7 @@ func GetMangaHandler(c echo.Context) error {
 
 	manga, err := services.GetManga(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, manga)

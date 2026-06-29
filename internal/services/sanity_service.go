@@ -247,8 +247,7 @@ func GetManga(id string) (*models.Manga, error) {
 						"url": asset->url
 				}
 			}
-		}
-	},
+		},
 	notes
 	}`, id)
 

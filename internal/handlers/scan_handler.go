@@ -15,7 +15,7 @@ func GetScanHandler(c echo.Context) error {
 
 	scan, err := services.GetScan(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
 	return c.JSON(http.StatusOK, scan)
