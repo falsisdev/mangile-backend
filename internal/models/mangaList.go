@@ -20,7 +20,7 @@ type AniListListMedia struct {
 	Format             string            `json:"format"`
 	Status             string            `json:"status"`
 	MeanScore          int               `json:"meanScore"`
-	AnilistDescription string            `json:"description"`
+	AniListDescription string            `json:"description"`
 	CoverImage         struct {
 		Large string `json:"large"`
 	} `json:"coverImage"`
@@ -40,5 +40,5 @@ type MangaCard struct {
 	Score              int    `json:"anilist_score"`
 	CoverImage         string `json:"anilist_cover_image"`
 	BannerImage        string `json:"anilist_banner_image"`
-	AnilistDescription string `json:"anilist_description"`
+	AniListDescription string `json:"anilist_description"`
 }
