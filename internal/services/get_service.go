@@ -113,6 +113,7 @@ func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
 			Score:         media.MeanScore,
 			CoverImage:    media.CoverImage.Large,
 			BannerImage:   media.BannerImage,
+			AniListDescription: media.Description,
 		}
 		mangaCards = append(mangaCards, card)
 	}
