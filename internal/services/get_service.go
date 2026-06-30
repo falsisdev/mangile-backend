@@ -40,6 +40,7 @@ func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
 				status
 				meanScore
 				bannerImage
+				description
 				coverImage {
 					large
 				}
