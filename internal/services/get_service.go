@@ -11,6 +11,114 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/models"
 )
 
+func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
+	var sortParam string
+	var statusParam string
+
+	switch filterType {
+	case "POPULAR":
+		sortParam = "POPULARITY_DESC"
+	case "HIGHEST_SCORE":
+		sortParam = "SCORE_DESC"
+	case "TRENDING":
+		sortParam = "TRENDING_DESC"
+	case "UPCOMING":
+		sortParam = "START_DATE_DESC"
+		statusParam = "NOT_YET_RELEASED"
+	default:
+		sortParam = "POPULARITY_DESC"
+	}
+
+	query := `
+	query ($page: Int, $perPage: Int, $sort: [MediaSort], $status: MediaStatus) {
+		Page (page: $page, perPage: $perPage) {
+			media (type: MANGA, sort: $sort, status: $status) {
+				id
+				idMal
+				type
+				format
+				status
+				meanScore
+				bannerImage
+				coverImage {
+					large
+				}
+				title {
+					romaji
+					english
+					native
+				}
+			}
+		}
+	}`
+
+	variables := map[string]interface{}{
+		"page":    1,
+		"perPage": limit,
+		"sort":    []string{sortParam},
+	}
+	if statusParam != "" {
+		variables["status"] = statusParam
+	}
+
+	requestBody, err := json.Marshal(map[string]interface{}{
+		"query":     query,
+		"variables": variables,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("request body marshalling failed: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, fmt.Errorf("[HATA]: HTTP isteği oluşturulurken bir sorun oluştu: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("[HATA]: Anilist API isteğinde bir sorun oluştu: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("[HATA]: Anilist API durum kodu: %d", resp.StatusCode)
+	}
+
+	var aniListResp models.AniListListResponse
+	if err := json.NewDecoder(resp.Body).Decode(&aniListResp); err != nil {
+		return nil, fmt.Errorf("[HATA]: Anilist yanıtı çözümlenirken hata oluştu: %w", err)
+	}
+
+	var mangaCards []models.MangaCard
+
+	for _, media := range aniListResp.Data.Page.Media {
+		mainTitle := media.Title.Romaji
+		if mainTitle == "" {
+			mainTitle = media.Title.English
+		}
+
+		card := models.MangaCard{
+			AniListID:     media.ID,
+			MyAnimeListID: media.IDMal,
+			AniListTitle:  mainTitle,
+			TitleRomaji:   media.Title.Romaji,
+			TitleEnglish:  media.Title.English,
+			TitleNative:   media.Title.Native,
+			Type:          media.Type,
+			Format:        media.Format,
+			Status:        media.Status,
+			Score:         media.MeanScore,
+			CoverImage:    media.CoverImage.Large,
+			BannerImage:   media.BannerImage,
+		}
+		mangaCards = append(mangaCards, card)
+	}
+
+	return mangaCards, nil
+}
+
 func GetArticle(slug string) (*models.Article, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 
@@ -485,34 +593,3 @@ func fetchAniListLightNovelData(malID int) (*models.AniListLightNovelResponse, e
 }
 
 //-------------------------- FETCH LIGHTNOVEL --------------------------------------
-
-func PostToSanity(document map[string]interface{}) error {
-	projectID := os.Getenv("SANITY_PROJECT_ID")
-	token := os.Getenv("SANITY_TOKEN")
-	url := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/mutate/production", projectID) //Burdaki %s üstteki değişkenlerden string olan ilki olduğu için projectID'yi implante etmiş olduk
-
-	payload := map[string]interface{}{
-		"mutations": []map[string]interface{}{
-			{"create": document},
-		},
-	}
-
-	jsonData, _ := json.Marshal(payload)
-
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("[Hata]: Sanity hatası %d", resp.StatusCode)
-	}
-
-	return nil
-}

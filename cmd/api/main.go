@@ -33,6 +33,7 @@ func main() {
 	e.GET("/api/list/:id", handlers.GetListHandler)
 	e.GET("/api/user/:id", handlers.GetUserHandler)
 	e.GET("/api/article/:slug", handlers.GetArticleHandler)
+	e.GET("/api/mangaList", handlers.GetMangaListHandler)
 
-	e.Logger.Fatal(e.Start(":3000"))
+	e.Logger.Fatal(e.Start(":3001"))
 }
