@@ -35,5 +35,9 @@ func main() {
 	e.GET("/api/article/:slug", handlers.GetArticleHandler)
 	e.GET("/api/mangaList", handlers.GetMangaListHandler)
 
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000", "https://mangile.vercel.app"},
+	}))
+
 	e.Logger.Fatal(e.Start(":3001"))
 }
