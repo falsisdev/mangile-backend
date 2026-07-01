@@ -20,3 +20,17 @@ func GetMangaHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, manga)
 }
+
+func GetMangaRecommendationsHandler(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: Manganın ID'si girilmemiş."})
+	}
+
+	recs, err := services.GetMangaRecommendations(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, recs)
+}

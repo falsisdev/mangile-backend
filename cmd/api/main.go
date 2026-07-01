@@ -28,6 +28,7 @@ func main() {
 	})
 
 	e.GET("/api/manga/:id", handlers.GetMangaHandler)
+	e.GET("/api/manga/:id/recommendations", handlers.GetMangaRecommendationsHandler)
 	e.GET("/api/lightNovel/:id", handlers.GetLightNovelHandler)
 	e.GET("/api/scan/:id", handlers.GetScanHandler)
 	e.GET("/api/list/:id", handlers.GetListHandler)

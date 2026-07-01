@@ -78,6 +78,37 @@ type AniListMangaMedia struct {
 	AnilistTags        []interface{}          `json:"tags"`
 }
 
+type AniListRecommendationResponse struct {
+	Data AniListRecommendationData `json:"data"`
+}
+
+type AniListRecommendationData struct {
+	Media AniListRecommendationMedia `json:"Media"`
+}
+
+type AniListRecommendationMedia struct {
+	Recommendations AniListRecommendationConnection `json:"recommendations"`
+}
+
+type AniListRecommendationConnection struct {
+	Nodes []AniListRecommendationNode `json:"nodes"`
+}
+
+type AniListRecommendationNode struct {
+	MediaRecommendation AniListRecommendation `json:"mediaRecommendation"`
+}
+
+type AniListRecommendation struct {
+	ID         int                             `json:"id"`
+	IDMal      int                             `json:"idMal"`
+	Type       string                          `json:"type"`
+	CoverImage AniListRecommendationCoverImage `json:"coverImage"`
+}
+
+type AniListRecommendationCoverImage struct {
+	ExtraLarge string `json:"extraLarge"`
+}
+
 type Manga struct {
 	ID                 string         `json:"id"`
 	Type               string         `json:"type"`

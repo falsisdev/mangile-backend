@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/falsisdev/mangile-backend/internal/models"
 )
@@ -427,6 +428,29 @@ func GetManga(id string) (*models.Manga, error) {
 	return finalLightNovel, nil
 }
 
+func GetMangaRecommendations(id string) ([]models.AniListRecommendation, error) {
+	malID, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, fmt.Errorf("[HATA]: Geçerli bir MAL ID'si girilmedi: %w", err)
+	}
+
+	aniListResp, err := fetchAniListMangaRecommendations(malID)
+	if err != nil {
+		return nil, fmt.Errorf("[HATA]: Anilist önerileri alınırken bir hata oluştu: %w", err)
+	}
+
+	if aniListResp == nil {
+		return nil, nil
+	}
+
+	var recommendations []models.AniListRecommendation
+	for _, node := range aniListResp.Data.Media.Recommendations.Nodes {
+		recommendations = append(recommendations, node.MediaRecommendation)
+	}
+
+	return recommendations, nil
+}
+
 func GetLightNovel(id string) (*models.LightNovel, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	if projectID == "" {
@@ -573,6 +597,63 @@ func fetchAniListMangaData(malID int) (*models.AniListMangaResponse, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&aniListResp); err != nil {
 		return nil, err
 	}
+	return &aniListResp, nil
+}
+
+func fetchAniListMangaRecommendations(malID int) (*models.AniListRecommendationResponse, error) {
+	query := `query ($idMal: Int, $type: MediaType, $sort: [RecommendationSort]) {
+		Media(idMal: $idMal, type: $type) {
+			recommendations(sort: $sort) {
+				nodes {
+					mediaRecommendation {
+						id
+						idMal
+						type
+						coverImage {
+							extraLarge
+						}
+					}
+				}
+			}
+		}
+	}`
+
+	variables := map[string]interface{}{
+		"idMal": malID,
+		"type":  "MANGA",
+		"sort":  []string{"RATING_DESC"},
+	}
+
+	requestBody, err := json.Marshal(map[string]interface{}{
+		"query":     query,
+		"variables": variables,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("[HATA]: Anilist API durum kodu: %d", resp.StatusCode)
+	}
+
+	var aniListResp models.AniListRecommendationResponse
+	if err := json.NewDecoder(resp.Body).Decode(&aniListResp); err != nil {
+		return nil, err
+	}
+
 	return &aniListResp, nil
 }
 
