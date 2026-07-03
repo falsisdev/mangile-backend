@@ -21,7 +21,6 @@ type SanityLightNovel struct {
 	SanityTags        []string            `json:"tags"`
 }
 
-// JikanMangaResponse: Jikan veriyi genellikle bir "data" objesi içinde sarar
 type JikanLightNovelResponse struct {
 	Data JikanLightNovelData `json:"data"`
 }
@@ -67,33 +66,37 @@ type AniListLightNovelMedia struct {
 	AnilistCover       AniListLightNovelCoverImage `json:"coverImage"`
 	AnilistDescription string                      `json:"description"`
 	AnilistTags        []interface{}               `json:"tags"`
+	Relations          AniListRelationsConnection  `json:"relations"`
+	SeasonYear         int                         `json:"seasonYear"`
 }
 
 type LightNovel struct {
-	ID                 string              `json:"id"`
-	Type               string              `json:"type"`
-	SanityTitle        string              `json:"sanity_title"`
-	SanityDescription  string              `json:"sanity_description"`
-	SanityBanner       string              `json:"sanity_banner"`
-	SanityCover        string              `json:"sanity_cover"`
-	SanityTags         []string            `json:"sanity_tags"`
-	AniListID          int                 `json:"anilist_id"`
-	AnilistTitle       string              `json:"anilist_title"`
-	AnilistScore       float64             `json:"anilist_score"`
-	AnilistBanner      string              `json:"anilist_banner"`
-	AnilistCover       string              `json:"anilist_cover"`
-	AnilistTags        []interface{}       `json:"anilist_tags"`
-	AnilistDescription string              `json:"anilist_description"`
-	AnilistTrending    int                 `json:"anilist_trending"`
-	MalID              int                 `json:"mal_id"`
-	MalTitleJapanese   string              `json:"title_japanese"`
-	MalTitleEnglish    string              `json:"title_english"`
-	MalStatus          string              `json:"mal_status"`
-	MalScore           float64             `json:"mal_score"`
-	MalAuthors         []interface{}       `json:"mal_authors"`
-	MalGenres          []interface{}       `json:"mal_genres"`
-	MalThemes          []interface{}       `json:"mal_themes"`
-	MalURL             string              `json:"mal_url"`
-	Chapters           []LightNovelChapter `json:"chapters"`
-	Notes              []interface{}       `json:"notes"`
+	ID                 string                     `json:"id"`
+	Type               string                     `json:"type"`
+	SanityTitle        string                     `json:"sanity_title"`
+	SanityDescription  string                     `json:"sanity_description"`
+	SanityBanner       string                     `json:"sanity_banner"`
+	SanityCover        string                     `json:"sanity_cover"`
+	SanityTags         []string                   `json:"sanity_tags"`
+	AniListID          int                        `json:"anilist_id"`
+	AnilistTitle       string                     `json:"anilist_title"`
+	AnilistScore       float64                    `json:"anilist_score"`
+	AnilistBanner      string                     `json:"anilist_banner"`
+	AnilistCover       string                     `json:"anilist_cover"`
+	AnilistTags        []interface{}              `json:"anilist_tags"`
+	AnilistDescription string                     `json:"anilist_description"`
+	AnilistTrending    int                        `json:"anilist_trending"`
+	AnilistSeasonYear  int                        `json:"anilist_season_year"`
+	AnilistRelations   AniListRelationsConnection `json:"anilist_relations"`
+	MalID              int                        `json:"mal_id"`
+	MalTitleJapanese   string                     `json:"title_japanese"`
+	MalTitleEnglish    string                     `json:"title_english"`
+	MalStatus          string                     `json:"mal_status"`
+	MalScore           float64                    `json:"mal_score"`
+	MalAuthors         []interface{}              `json:"mal_authors"`
+	MalGenres          []interface{}              `json:"mal_genres"`
+	MalThemes          []interface{}              `json:"mal_themes"`
+	MalURL             string                     `json:"mal_url"`
+	Chapters           []LightNovelChapter        `json:"chapters"`
+	Notes              []interface{}              `json:"notes"`
 }

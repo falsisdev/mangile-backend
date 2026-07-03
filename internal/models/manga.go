@@ -29,7 +29,6 @@ type SanityManga struct {
 	SanityTags        []string       `json:"tags"`
 }
 
-// JikanMangaResponse: Jikan veriyi genellikle bir "data" objesi içinde sarar
 type JikanMangaResponse struct {
 	Data JikanMangaData `json:"data"`
 }
@@ -45,7 +44,6 @@ type JikanMangaData struct {
 	MalThemes        []interface{} `json:"themes"`
 }
 
-// AniList GraphQL API kullandığı için dönen yanıt genellikle "data" -> "Media" şeklinde olur.
 type AniListMangaResponse struct {
 	Data AniListMangaData `json:"data"`
 }
@@ -67,15 +65,45 @@ type AniListMangaTitle struct {
 	Native  string `json:"native"`
 }
 
+type AniListRelationNodeTitle struct {
+	Romaji string `json:"romaji"`
+}
+
+type AniListRelationNodeCover struct {
+	ExtraLarge string `json:"extraLarge"`
+}
+
+type AniListRelationNode struct {
+	ID         int                      `json:"id"`
+	IDMal      *int                     `json:"idMal"`
+	Type       string                   `json:"type"`
+	MeanScore  *float64                 `json:"meanScore"`
+	SeasonYear *int                     `json:"seasonYear"`
+	Title      AniListRelationNodeTitle `json:"title"`
+	CoverImage AniListRelationNodeCover `json:"coverImage"`
+}
+
+type AniListRelationEdge struct {
+	ID           int                 `json:"id"`
+	RelationType string              `json:"relationType"`
+	Node         AniListRelationNode `json:"node"`
+}
+
+type AniListRelationsConnection struct {
+	Edges []AniListRelationEdge `json:"edges"`
+}
+
 type AniListMangaMedia struct {
-	AnilistID          int                    `json:"id"`
-	AnilistTitle       AniListMangaTitle      `json:"title"`
-	AnilistTrending    int                    `json:"trending"`
-	AnilistScore       float64                `json:"averageScore"`
-	AniListBanner      string                 `json:"bannerImage"`
-	AnilistCover       AniListMangaCoverImage `json:"coverImage"`
-	AnilistDescription string                 `json:"description"`
-	AnilistTags        []interface{}          `json:"tags"`
+	AnilistID          int                        `json:"id"`
+	AnilistTitle       AniListMangaTitle          `json:"title"`
+	AnilistTrending    int                        `json:"trending"`
+	AnilistScore       float64                    `json:"averageScore"`
+	AniListBanner      string                     `json:"bannerImage"`
+	AnilistCover       AniListMangaCoverImage     `json:"coverImage"`
+	AnilistDescription string                     `json:"description"`
+	AnilistTags        []interface{}              `json:"tags"`
+	Relations          AniListRelationsConnection `json:"relations"`
+	SeasonYear         int                        `json:"seasonYear"`
 }
 
 type AniListRecommendationResponse struct {
@@ -110,30 +138,32 @@ type AniListRecommendationCoverImage struct {
 }
 
 type Manga struct {
-	ID                 string         `json:"id"`
-	Type               string         `json:"type"`
-	SanityTitle        string         `json:"sanity_title"`
-	SanityDescription  string         `json:"sanity_description"`
-	SanityBanner       string         `json:"sanity_banner"`
-	SanityCover        string         `json:"sanity_cover"`
-	SanityTags         []string       `json:"sanity_tags"`
-	AniListID          int            `json:"anilist_id"`
-	AnilistTitle       string         `json:"anilist_title"`
-	AnilistScore       float64        `json:"anilist_score"`
-	AnilistBanner      string         `json:"anilist_banner"`
-	AnilistCover       string         `json:"anilist_cover"`
-	AnilistTags        []interface{}  `json:"anilist_tags"`
-	AnilistDescription string         `json:"anilist_description"`
-	AnilistTrending    int            `json:"anilist_trending"`
-	MalID              int            `json:"mal_id"`
-	MalTitleJapanese   string         `json:"title_japanese"`
-	MalTitleEnglish    string         `json:"title_english"`
-	MalStatus          string         `json:"mal_status"`
-	MalScore           float64        `json:"mal_score"`
-	MalAuthors         []interface{}  `json:"mal_authors"`
-	MalGenres          []interface{}  `json:"mal_genres"`
-	MalThemes          []interface{}  `json:"mal_themes"`
-	MalURL             string         `json:"mal_url"`
-	Chapters           []MangaChapter `json:"chapters"`
-	Notes              []interface{}  `json:"notes"`
+	ID                 string                     `json:"id"`
+	Type               string                     `json:"type"`
+	SanityTitle        string                     `json:"sanity_title"`
+	SanityDescription  string                     `json:"sanity_description"`
+	SanityBanner       string                     `json:"sanity_banner"`
+	SanityCover        string                     `json:"sanity_cover"`
+	SanityTags         []string                   `json:"sanity_tags"`
+	AniListID          int                        `json:"anilist_id"`
+	AnilistTitle       string                     `json:"anilist_title"`
+	AnilistScore       float64                    `json:"anilist_score"`
+	AnilistBanner      string                     `json:"anilist_banner"`
+	AnilistCover       string                     `json:"anilist_cover"`
+	AnilistTags        []interface{}              `json:"anilist_tags"`
+	AnilistDescription string                     `json:"anilist_description"`
+	AnilistTrending    int                        `json:"anilist_trending"`
+	AnilistSeasonYear  int                        `json:"anilist_season_year"`
+	AnilistRelations   AniListRelationsConnection `json:"anilist_relations"`
+	MalID              int                        `json:"mal_id"`
+	MalTitleJapanese   string                     `json:"title_japanese"`
+	MalTitleEnglish    string                     `json:"title_english"`
+	MalStatus          string                     `json:"mal_status"`
+	MalScore           float64                    `json:"mal_score"`
+	MalAuthors         []interface{}              `json:"mal_authors"`
+	MalGenres          []interface{}              `json:"mal_genres"`
+	MalThemes          []interface{}              `json:"mal_themes"`
+	MalURL             string                     `json:"mal_url"`
+	Chapters           []MangaChapter             `json:"chapters"`
+	Notes              []interface{}              `json:"notes"`
 }
