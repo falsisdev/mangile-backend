@@ -61,9 +61,9 @@ func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
 		sortParam = "POPULARITY_DESC"
 	}
 	query := `
-	query ($page: Int, $perPage: Int, $sort: [MediaSort], $status: MediaStatus) {
+	query ($page: Int, $perPage: Int, $sort: [MediaSort], $status: MediaStatus, $isAdult: false) {
 		Page (page: $page, perPage: $perPage) {
-			media (type: MANGA, sort: $sort, status: $status) {
+			media (type: MANGA, sort: $sort, status: $status, isAdult: $isAdult) {
 				id
 				idMal
 				type
@@ -87,6 +87,7 @@ func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
 		"page":    1,
 		"perPage": limit,
 		"sort":    []string{sortParam},
+		"isAdult": false,
 	}
 	if statusParam != "" {
 		variables["status"] = statusParam
@@ -289,12 +290,12 @@ func GetManga(id string) (*models.Manga, error) {
 		return nil, fmt.Errorf("SANITY_PROJECT_ID ortam değişkeni bulunamadı")
 	}
 	query := fmt.Sprintf(`*[_type == "manga" && myAnimeListId == %s][0]{
-		_id, 
+		_id,
 		_type,
 		_createdAt,
 		_updatedAt,
 		myAnimeListId,
-		title, 
+		title,
 		description,
 		tags,
 		"bannerImage": bannerImage.asset->url,
@@ -302,6 +303,10 @@ func GetManga(id string) (*models.Manga, error) {
 		"chapters": chapters[]{
 			chapterNumber,
 			title,
+			"source": source -> {
+			    _id,
+			    name
+			},
 			"pages": pages[]{
 				"asset": {
 					"url": asset->url
@@ -414,6 +419,10 @@ func GetLightNovel(id string) (*models.LightNovel, error) {
 	"chapters": chapters[]{
 		chapterNumber,
 		title,
+		"source": source -> {
+        	_id,
+            name
+        },
 		"content": content
 	},
 	notes

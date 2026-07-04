@@ -1,5 +1,7 @@
 package models
 
+import "encoding/json"
+
 type PageAsset struct {
 	URL string `json:"url"`
 }
@@ -8,10 +10,16 @@ type MangaPage struct {
 	Asset PageAsset `json:"asset"`
 }
 
+type ChapterSource struct {
+	ID   string `json:"_id"`
+	Name string `json:"name"`
+}
+
 type MangaChapter struct {
-	ChapterNumber float64     `json:"chapterNumber"`
-	Title         string      `json:"title"`
-	Pages         []MangaPage `json:"pages"`
+	ChapterNumber float64        `json:"chapterNumber"`
+	Title         string         `json:"title"`
+	Source        *ChapterSource `json:"source,omitempty"`
+	Pages         []MangaPage    `json:"pages"`
 }
 
 type SanityManga struct {
@@ -93,6 +101,26 @@ type AniListRelationsConnection struct {
 	Edges []AniListRelationEdge `json:"edges"`
 }
 
+func (c *AniListRelationsConnection) UnmarshalJSON(data []byte) error {
+	type Alias AniListRelationsConnection
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	var filtered []AniListRelationEdge
+	for _, edge := range aux.Edges {
+		if edge.Node.Type == "MANGA" {
+			filtered = append(filtered, edge)
+		}
+	}
+	c.Edges = filtered
+	return nil
+}
+
 type AniListMangaMedia struct {
 	AnilistID          int                        `json:"id"`
 	AnilistTitle       AniListMangaTitle          `json:"title"`
@@ -130,6 +158,7 @@ type AniListRecommendation struct {
 	ID         int                             `json:"id"`
 	IDMal      int                             `json:"idMal"`
 	Type       string                          `json:"type"`
+	Title      AniListMangaTitle               `json:"title"`
 	CoverImage AniListRecommendationCoverImage `json:"coverImage"`
 }
 
@@ -167,3 +196,37 @@ type Manga struct {
 	Chapters           []MangaChapter             `json:"chapters"`
 	Notes              []interface{}              `json:"notes"`
 }
+
+/* query Media($type: MediaType, $isAdult: Boolean, $sort: [MediaSort]) {
+  Media(type: $type, isAdult: $isAdult, sort: $sort) {
+    bannerImage
+    coverImage {
+      extraLarge
+    }
+    description
+    genres
+    id
+    idMal
+    meanScore
+    popularity
+    rankings {
+      allTime
+      context
+      id
+      rank
+      season
+      year
+      type
+      format
+    }
+    type
+    chapters
+    seasonYear
+    title {
+      english
+      native
+      romaji
+    }
+    volumes
+  }
+} */
