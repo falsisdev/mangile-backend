@@ -196,37 +196,3 @@ type Manga struct {
 	Chapters           []MangaChapter             `json:"chapters"`
 	Notes              []interface{}              `json:"notes"`
 }
-
-/* query Media($type: MediaType, $isAdult: Boolean, $sort: [MediaSort]) {
-  Media(type: $type, isAdult: $isAdult, sort: $sort) {
-    bannerImage
-    coverImage {
-      extraLarge
-    }
-    description
-    genres
-    id
-    idMal
-    meanScore
-    popularity
-    rankings {
-      allTime
-      context
-      id
-      rank
-      season
-      year
-      type
-      format
-    }
-    type
-    chapters
-    seasonYear
-    title {
-      english
-      native
-      romaji
-    }
-    volumes
-  }
-} */

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -44,9 +45,14 @@ func GetSanityList(filterType string) ([]models.SanityList, error) {
 	return sanityListWrapper.Result, nil
 }
 
-func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
+func GetMangaList(filterType string, limit int, page int) ([]models.MangaCard, error) {
+	if page < 1 {
+		page = 1
+	}
+
 	var sortParam string
-	var statusParam string
+	var statusParam *string
+
 	switch filterType {
 	case "POPULAR":
 		sortParam = "POPULARITY_DESC"
@@ -56,14 +62,15 @@ func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
 		sortParam = "TRENDING_DESC"
 	case "UPCOMING":
 		sortParam = "START_DATE_DESC"
-		statusParam = "NOT_YET_RELEASED"
+		statusVal := "NOT_YET_RELEASED"
+		statusParam = &statusVal
 	default:
 		sortParam = "POPULARITY_DESC"
 	}
 	query := `
-	query ($page: Int, $perPage: Int, $sort: [MediaSort], $status: MediaStatus, $isAdult: false) {
+	query Media($type: MediaType, $isAdult: Boolean, $sort: [MediaSort], $countryOfOrigin: CountryCode, $page: Int, $perPage: Int) {
 		Page (page: $page, perPage: $perPage) {
-			media (type: MANGA, sort: $sort, status: $status, isAdult: $isAdult) {
+			media (type: $type, sort: $sort, isAdult: $isAdult, countryOfOrigin: $countryOfOrigin) {
 				id
 				idMal
 				type
@@ -84,20 +91,23 @@ func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
 		}
 	}`
 	variables := map[string]interface{}{
-		"page":    1,
-		"perPage": limit,
-		"sort":    []string{sortParam},
-		"isAdult": false,
+		"type":            "MANGA",
+		"page":            page,
+		"perPage":         limit,
+		"sort":            []string{sortParam},
+		"isAdult":         false,
+		"countryOfOrigin": "JP",
+		"status":          statusParam, // nil gönderilirse AniList bunu yok sayar
 	}
-	if statusParam != "" {
-		variables["status"] = statusParam
+	if statusParam == nil {
+		delete(variables, "status")
 	}
 	requestBody, err := json.Marshal(map[string]interface{}{
 		"query":     query,
 		"variables": variables,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("request body marshalling failed: %w", err)
+		return nil, fmt.Errorf("[HATA]: Request body marshalling failed: %w", err)
 	}
 	req, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -111,7 +121,8 @@ func GetMangaList(filterType string, limit int) ([]models.MangaCard, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("[HATA]: Anilist API durum kodu: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("[HATA]: Anilist API durum kodu: %d\nyanıt: %s", resp.StatusCode, string(bodyBytes))
 	}
 	var aniListResp models.AniListListResponse
 	if err := json.NewDecoder(resp.Body).Decode(&aniListResp); err != nil {
