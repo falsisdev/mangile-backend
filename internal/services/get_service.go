@@ -16,16 +16,16 @@ import (
 func GetSanityList(filterType string) ([]models.SanityList, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == 'manga' || _type == 'lightNovel'] | order(_%s desc){
-		_id,
-		title,
-		myAnimeListId,
-		_createdAt,
-		_updatedAt,
-		_type,
-		tags,
-		"bannerImage": bannerImage.asset->url,
-		"coverImage": coverImage.asset->url
-	}`, filterType)
+        _id,
+        title,
+        myAnimeListId,
+        _createdAt,
+        _updatedAt,
+        _type,
+        tags,
+        "bannerImage": bannerImage.asset->url,
+        "coverImage": coverImage.asset->url
+    }`, filterType)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 	u, _ := url.Parse(baseURL)
 	q := u.Query()
@@ -68,28 +68,28 @@ func GetMangaList(filterType string, limit int, page int) ([]models.MangaCard, e
 		sortParam = "POPULARITY_DESC"
 	}
 	query := `
-	query Media($type: MediaType, $isAdult: Boolean, $sort: [MediaSort], $countryOfOrigin: CountryCode, $page: Int, $perPage: Int) {
-		Page (page: $page, perPage: $perPage) {
-			media (type: $type, sort: $sort, isAdult: $isAdult, countryOfOrigin: $countryOfOrigin) {
-				id
-				idMal
-				type
-				format
-				status
-				meanScore
-				bannerImage
-				description
-				coverImage {
-					large
-				}
-				title {
-					romaji
-					english
-					native
-				}
-			}
-		}
-	}`
+    query Media($type: MediaType, $isAdult: Boolean, $sort: [MediaSort], $countryOfOrigin: CountryCode, $page: Int, $perPage: Int) {
+        Page (page: $page, perPage: $perPage) {
+            media (type: $type, sort: $sort, isAdult: $isAdult, countryOfOrigin: $countryOfOrigin) {
+                id
+                idMal
+                type
+                format
+                status
+                meanScore
+                bannerImage
+                description
+                coverImage {
+                    large
+                }
+                title {
+                    romaji
+                    english
+                    native
+                }
+            }
+        }
+    }`
 	variables := map[string]interface{}{
 		"type":            "MANGA",
 		"page":            page,
@@ -97,7 +97,7 @@ func GetMangaList(filterType string, limit int, page int) ([]models.MangaCard, e
 		"sort":            []string{sortParam},
 		"isAdult":         false,
 		"countryOfOrigin": "JP",
-		"status":          statusParam, // nil gönderilirse AniList bunu yok sayar
+		"status":          statusParam,
 	}
 	if statusParam == nil {
 		delete(variables, "status")
@@ -179,36 +179,36 @@ func GetArticle(slug string) (*models.Article, error) {
 func GetUser(id string) (*models.User, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == "auth" && logtoId == "%s"][0]{
-	_id,
-	_type,
-	title,
-	_createdAt,
-	avatar,
-	"banner": banner.asset -> url,
-	bio,
-	favoriteChapters,
-	favoriteTitles,
-	favoriteTitle,
-	gender,
-	logtoId,
-	name,
-	username,
-	"lists": lists[]->{
-			 _id,
-			_type,
-			title,
-			createdAt,
-			items,
-			user->{_id, logtoId, name, avatar, username},
-			"likes": likes[]->{
-					_id,
-					name,
-					avatar,
-					username,
-					logtoId
-					},
-			},
-	}`, id)
+    _id,
+    _type,
+    title,
+    _createdAt,
+    avatar,
+    "banner": banner.asset -> url,
+    bio,
+    favoriteChapters,
+    favoriteTitles,
+    favoriteTitle,
+    gender,
+    logtoId,
+    name,
+    username,
+    "lists": lists[]->{
+             _id,
+            _type,
+            title,
+            createdAt,
+            items,
+            user->{_id, logtoId, name, avatar, username},
+            "likes": likes[]->{
+                    _id,
+                    name,
+                    avatar,
+                    username,
+                    logtoId
+                    },
+            },
+    }`, id)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 	u, _ := url.Parse(baseURL)
 	q := u.Query()
@@ -231,20 +231,20 @@ func GetUser(id string) (*models.User, error) {
 func GetList(id string) (*models.List, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == "lists" && _id == "%s"][0]{
-	_id,
-	_type,
-	title,
-	createdAt,
-	items,
-	user->{_id, logtoId, name, avatar, username},
-	"likes": likes[]->{
-			  _id,
-			  name,
-			  avatar,
-			  username,
-			  logtoId
-			},
-	}`, id)
+    _id,
+    _type,
+    title,
+    createdAt,
+    items,
+    user->{_id, logtoId, name, avatar, username},
+    "likes": likes[]->{
+              _id,
+              name,
+              avatar,
+              username,
+              logtoId
+            },
+    }`, id)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 	u, _ := url.Parse(baseURL)
 	q := u.Query()
@@ -267,15 +267,15 @@ func GetList(id string) (*models.List, error) {
 func GetScan(id string) (*models.Scan, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == "scan" && _id == "%s"][0]{
-	_id,
-	_type,
-	name,
-	description,
-	"coverImage": coverImage.asset -> url,
-	"logo": logo.asset -> url,
-	members,
-	website
-	}`, id)
+    _id,
+    _type,
+    name,
+    description,
+    "coverImage": coverImage.asset -> url,
+    "logo": logo.asset -> url,
+    members,
+    website
+    }`, id)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 	u, _ := url.Parse(baseURL)
 	q := u.Query()
@@ -301,31 +301,31 @@ func GetManga(id string) (*models.Manga, error) {
 		return nil, fmt.Errorf("SANITY_PROJECT_ID ortam değişkeni bulunamadı")
 	}
 	query := fmt.Sprintf(`*[_type == "manga" && myAnimeListId == %s][0]{
-		_id,
-		_type,
-		_createdAt,
-		_updatedAt,
-		myAnimeListId,
-		title,
-		description,
-		tags,
-		"bannerImage": bannerImage.asset->url,
-		"coverImage": coverImage.asset->url,
-		"chapters": chapters[]{
-			chapterNumber,
-			title,
-			"source": source -> {
-			    _id,
-			    name
-			},
-			"pages": pages[]{
-				"asset": {
-					"url": asset->url
-				}
-			}
-		},
-		notes
-	}`, id)
+        _id,
+        _type,
+        _createdAt,
+        _updatedAt,
+        myAnimeListId,
+        title,
+        description,
+        tags,
+        "bannerImage": bannerImage.asset->url,
+        "coverImage": coverImage.asset->url,
+        "chapters": chapters[]{
+            chapterNumber,
+            title,
+            "source": source -> {
+                _id,
+                name
+            },
+            "pages": pages[]{
+                "asset": {
+                    "url": asset->url
+                }
+            }
+        },
+        notes
+    }`, id)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -417,27 +417,27 @@ func GetLightNovel(id string) (*models.LightNovel, error) {
 		return nil, fmt.Errorf("SANITY_PROJECT_ID ortam değişkeni bulunamadı")
 	}
 	query := fmt.Sprintf(`*[_type == "lightNovel" && myAnimeListId == %s][0]{
-	_id, 
-	title, 
-	description,
-	myAnimeListId,
-	_createdAt,
-	_updatedAt,
-	_type,
-	tags,
-	"bannerImage": bannerImage.asset->url,
-	"coverImage": coverImage.asset->url,
-	"chapters": chapters[]{
-		chapterNumber,
-		title,
-		"source": source -> {
-        	_id,
+    _id, 
+    title, 
+    description,
+    myAnimeListId,
+    _createdAt,
+    _updatedAt,
+    _type,
+    tags,
+    "bannerImage": bannerImage.asset->url,
+    "coverImage": coverImage.asset->url,
+    "chapters": chapters[]{
+        chapterNumber,
+        title,
+        "source": source -> {
+            _id,
             name
         },
-		"content": content
-	},
-	notes
-	}`, id)
+        "content": content
+    },
+    notes
+    }`, id)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -521,40 +521,45 @@ func fetchJikanMangaData(malID int) (*models.JikanMangaResponse, error) {
 func fetchAniListMangaData(malID int) (*models.AniListMangaResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": fmt.Sprintf(`{
-			Media(idMal: %d, type: MANGA) {
-				id
-				trending
-				averageScore
-				bannerImage
-				coverImage {
-					large
-				}
-				description
-				tags {
-					name
-				}
-				relations {
-					edges {
-						id
-						relationType
-						node {
-							coverImage {
-								extraLarge
-							}
-							idMal
-							id
-							meanScore
-							title {
-								romaji
-							}
-							seasonYear
-							type
-						}
-					}
-				}
-				seasonYear
-			}
-		}`, malID),
+            Media(idMal: %d, type: MANGA) {
+                id
+                title {
+                    romaji
+                    english
+                    native
+                }
+                trending
+                averageScore
+                bannerImage
+                coverImage {
+                    large
+                }
+                description
+                tags {
+                    name
+                }
+                relations {
+                    edges {
+                        id
+                        relationType
+                        node {
+                            coverImage {
+                                extraLarge
+                            }
+                            idMal
+                            id
+                            meanScore
+                            title {
+                                romaji
+                            }
+                            seasonYear
+                            type
+                        }
+                    }
+                }
+                seasonYear
+            }
+        }`, malID),
 	}
 	jsonValue, _ := json.Marshal(jsonData)
 	request, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
@@ -577,21 +582,26 @@ func fetchAniListMangaData(malID int) (*models.AniListMangaResponse, error) {
 
 func fetchAniListMangaRecommendations(malID int) (*models.AniListRecommendationResponse, error) {
 	query := `query ($idMal: Int, $type: MediaType, $sort: [RecommendationSort]) {
-		Media(idMal: $idMal, type: $type) {
-			recommendations(sort: $sort) {
-				nodes {
-					mediaRecommendation {
-						id
-						idMal
-						type
-						coverImage {
-							extraLarge
-						}
-					}
-				}
-			}
-		}
-	}`
+        Media(idMal: $idMal, type: $type) {
+            recommendations(sort: $sort) {
+                nodes {
+                    mediaRecommendation {
+                        id
+                        idMal
+                        type
+                        title {
+                            romaji
+                            english
+                            native
+                        }
+                        coverImage {
+                            extraLarge
+                        }
+                    }
+                }
+            }
+        }
+    }`
 	variables := map[string]interface{}{
 		"idMal": malID,
 		"type":  "MANGA",
@@ -628,40 +638,45 @@ func fetchAniListMangaRecommendations(malID int) (*models.AniListRecommendationR
 func fetchAniListLightNovelData(malID int) (*models.AniListLightNovelResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": fmt.Sprintf(`{
-			Media(idMal: %d, type: MANGA) {
-				id
-				trending
-				averageScore
-				bannerImage
-				coverImage {
-					large
-				}
-				description
-				tags {
-					name
-				}
-				relations {
-					edges {
-						id
-						relationType
-						node {
-							coverImage {
-								extraLarge
-							}
-							idMal
-							id
-							meanScore
-							title {
-								romaji
-							}
-							seasonYear
-							type
-						}
-					}
-				}
-				seasonYear
-			}
-		}`, malID),
+            Media(idMal: %d, type: MANGA) {
+                id
+                title {
+                    romaji
+                    english
+                    native
+                }
+                trending
+                averageScore
+                bannerImage
+                coverImage {
+                    large
+                }
+                description
+                tags {
+                    name
+                }
+                relations {
+                    edges {
+                        id
+                        relationType
+                        node {
+                            coverImage {
+                                extraLarge
+                            }
+                            idMal
+                            id
+                            meanScore
+                            title {
+                                romaji
+                            }
+                            seasonYear
+                            type
+                        }
+                    }
+                }
+                seasonYear
+            }
+        }`, malID),
 	}
 	jsonValue, _ := json.Marshal(jsonData)
 	request, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))

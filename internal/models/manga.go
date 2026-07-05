@@ -156,10 +156,16 @@ type AniListRecommendationNode struct {
 
 type AniListRecommendation struct {
 	ID         int                             `json:"id"`
-	IDMal      int                             `json:"idMal"`
+	IDMal      *int                            `json:"idMal"`
 	Type       string                          `json:"type"`
-	Title      AniListMangaTitle               `json:"title"`
+	Title      AniListRecommendationTitle      `json:"title"`
 	CoverImage AniListRecommendationCoverImage `json:"coverImage"`
+}
+
+type AniListRecommendationTitle struct {
+	Romaji  string `json:"romaji"`
+	English string `json:"english"`
+	Native  string `json:"native"`
 }
 
 type AniListRecommendationCoverImage struct {
