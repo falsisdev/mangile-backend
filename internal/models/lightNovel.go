@@ -1,9 +1,11 @@
 package models
 
 type LightNovelChapter struct {
-	ChapterNumber float64       `json:"chapterNumber"`
-	Title         string        `json:"title"`
-	Content       []interface{} `json:"content"`
+	ChapterNumber float64        `json:"chapterNumber"`
+	Title         string         `json:"title"`
+	Source        *ChapterSource `json:"source,omitempty"`
+	Key           string         `json:"_key"`
+	Content       []interface{}  `json:"content"`
 }
 
 type SanityLightNovel struct {

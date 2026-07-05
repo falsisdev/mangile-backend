@@ -314,6 +314,7 @@ func GetManga(id string) (*models.Manga, error) {
         "chapters": chapters[]{
             chapterNumber,
             title,
+			_key,
             "source": source -> {
                 _id,
                 name
@@ -430,6 +431,7 @@ func GetLightNovel(id string) (*models.LightNovel, error) {
     "chapters": chapters[]{
         chapterNumber,
         title,
+		_key,
         "source": source -> {
             _id,
             name

@@ -19,6 +19,7 @@ type MangaChapter struct {
 	ChapterNumber float64        `json:"chapterNumber"`
 	Title         string         `json:"title"`
 	Source        *ChapterSource `json:"source,omitempty"`
+	Key           string         `json:"_key"`
 	Pages         []MangaPage    `json:"pages"`
 }
 
