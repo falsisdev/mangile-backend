@@ -13,25 +13,28 @@ type AniListListPage struct {
 }
 
 type AniListListMedia struct {
-	ID                 int               `json:"id"`
-	IDMal              int               `json:"idMal"`
-	Title              AniListMangaTitle `json:"title"`
-	Type               string            `json:"type"`
-	Format             string            `json:"format"`
-	Status             string            `json:"status"`
-	MeanScore          int               `json:"meanScore"`
-	Description		   string            `json:"description"`
-	CoverImage         struct {
+	ID          int               `json:"id"`
+	IDMal       int               `json:"idMal"`
+	Title       AniListMangaTitle `json:"title"`
+	Type        string            `json:"type"`
+	Format      string            `json:"format"`
+	Status      string            `json:"status"`
+	MeanScore   int               `json:"meanScore"`
+	Description string            `json:"description"`
+	CoverImage  struct {
 		Large string `json:"large"`
-	} 									 `json:"coverImage"`
-	BannerImage string 					 `json:"bannerImage"`
+	} `json:"coverImage"`
+	BannerImage string `json:"bannerImage"`
+	StartDate   struct {
+		Year int `json:"year"`
+	} `json:"startDate"`
 }
 
 type MangaCard struct {
 	AniListID          int    `json:"anilist_id"`
 	MyAnimeListID      int    `json:"mal_id"`
 	AniListTitle       string `json:"anilist_title"`
-	TitleRomaji        string `json:"anilist_title_romaji"`
+	TitleRomaji        string `json:"title_romaji"`
 	TitleEnglish       string `json:"title_english"`
 	TitleNative        string `json:"title_native"`
 	Type               string `json:"anilist_type"`
@@ -41,4 +44,8 @@ type MangaCard struct {
 	CoverImage         string `json:"anilist_cover_image"`
 	BannerImage        string `json:"anilist_banner_image"`
 	AniListDescription string `json:"anilist_description"`
+	MalType            string `json:"mal_type"`
+	MalYear            int    `json:"mal_year"`
+	HasLocalContent    bool   `json:"has_local_content"`
+	SanityDescription  string `json:"sanity_description"`
 }
