@@ -1,2 +1,4 @@
 /cmd/api/.env
 .idea
+.DS_Store
+/cmd/.DS_Store

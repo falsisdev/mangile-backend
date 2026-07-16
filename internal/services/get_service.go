@@ -46,7 +46,7 @@ func GetSanityList(filterType string) ([]models.SanityList, error) {
 	return sanityListWrapper.Result, nil
 }
 
-func GetMangaList(filterType string, limit int, page int) ([]models.MangaCard, error) {
+func GetMangaList(filterType string, limit int, page int, searchQuery string) ([]models.MangaCard, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -54,24 +54,29 @@ func GetMangaList(filterType string, limit int, page int) ([]models.MangaCard, e
 	var sortParam string
 	var statusParam *string
 
-	switch filterType {
-	case "POPULAR":
-		sortParam = "POPULARITY_DESC"
-	case "HIGHEST_SCORE":
-		sortParam = "SCORE_DESC"
-	case "TRENDING":
-		sortParam = "TRENDING_DESC"
-	case "UPCOMING":
-		sortParam = "START_DATE_DESC"
-		statusVal := "NOT_YET_RELEASED"
-		statusParam = &statusVal
-	default:
-		sortParam = "POPULARITY_DESC"
+	if searchQuery != "" {
+		sortParam = ""
+	} else {
+		switch filterType {
+		case "POPULAR":
+			sortParam = "sort: [POPULARITY_DESC],"
+		case "HIGHEST_SCORE":
+			sortParam = "sort: [SCORE_DESC],"
+		case "TRENDING":
+			sortParam = "sort: [TRENDING_DESC],"
+		case "UPCOMING":
+			sortParam = "sort: [START_DATE_DESC],"
+			statusVal := "NOT_YET_RELEASED"
+			statusParam = &statusVal
+		default:
+			sortParam = "sort: [POPULARITY_DESC],"
+		}
 	}
+
 	query := fmt.Sprintf(`
-	query Media($type: MediaType, $isAdult: Boolean, $countryOfOrigin: CountryCode, $page: Int, $perPage: Int, $status: MediaStatus) {
+	query Media($type: MediaType, $isAdult: Boolean, $countryOfOrigin: CountryCode, $page: Int, $perPage: Int, $status: MediaStatus, $search: String) {
 		Page (page: $page, perPage: $perPage) {
-			media (type: $type, sort: [%s], isAdult: $isAdult, countryOfOrigin: $countryOfOrigin, status: $status) {
+			media (type: $type, %s search: $search, isAdult: $isAdult, countryOfOrigin: $countryOfOrigin, status: $status) {
 				id
 				idMal
 				type
@@ -106,6 +111,10 @@ func GetMangaList(filterType string, limit int, page int) ([]models.MangaCard, e
 
 	if statusParam == nil {
 		delete(variables, "status")
+	}
+
+	if searchQuery != "" {
+		variables["search"] = searchQuery
 	}
 
 	requestBody, err := json.Marshal(map[string]interface{}{
