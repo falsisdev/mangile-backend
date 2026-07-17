@@ -391,7 +391,7 @@ func GetManga(id string) (*models.Manga, error) {
 		return nil, fmt.Errorf("SANITY_PROJECT_ID ortam değişkeni bulunamadı")
 	}
 	query := fmt.Sprintf(`*[_type == "manga" && myAnimeListId == %s][0]{
-		"id": _id,
+		_id,
 		_type,
 		_createdAt,
 		_updatedAt,
