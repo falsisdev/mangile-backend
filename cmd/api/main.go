@@ -11,7 +11,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/handlers"
 )
 
-// .env'den bilgi çekmek için: os.Getenv("SANITY_TOKEN") (os paketi gerekiyor)
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -22,6 +21,11 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000", "https://mangile.vercel.app"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	}))
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "[✅]: Sunucu başarıyla başlatıldı.")
@@ -35,10 +39,6 @@ func main() {
 	e.GET("/api/article/:slug", handlers.GetArticleHandler)
 	e.GET("/api/mangaList", handlers.GetMangaListHandler)
 	e.GET("/api/sanityList", handlers.GetSanityListHandler)
-
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000", "https://mangile.vercel.app"},
-	}))
 
 	e.Logger.Fatal(e.Start(":3001"))
 }
