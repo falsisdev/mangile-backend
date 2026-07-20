@@ -18,7 +18,18 @@ func GetChapter(key string, filterType string) (models.Chapter, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 
 	query := fmt.Sprintf(`*[_type == "%s" && "%s" in chapters[]._key][0]{
-		"chapter": chapters[_key == "%s"][0]
+		"chapter": chapters[_key == "%s"][0]{
+			_key,
+			_type,
+			chapterNumber,
+			"pages": pages[]{
+			"url": asset->url
+			},
+			source->{
+			name,
+			_id
+			}
+		}
 	}`, filterType, key, key)
 
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
