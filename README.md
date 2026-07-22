@@ -7,11 +7,11 @@ Low-latency, high-throughput backend engine for the [Mangile](https://github.com
 
 ## Overview
 
-`mangile-backend` is a scalable content serving and indexing service written in Go. Built with standard library efficiency (`net/http`), clean architecture, and strict domain separation, it powers the backend capabilities of the Mangile ecosystem.
+`mangile-backend` is a scalable content serving and indexing service written in Go. Built with standard library efficiency (`echo`), clean architecture, and strict domain separation, it powers the backend capabilities of the Mangile ecosystem.
 
 ### Key Features
 
-* **High-Performance Pipeline:** Leverages Go's native concurrent runtime and optimized `net/http` stack for minimal overhead.
+* **High-Performance Pipeline:** Leverages Go's native concurrent runtime and optimized `echo` stack for minimal overhead.
 * **Strict Domain Isolation:** Explicit segregation between distinct comic/media entities (e.g., `Manga` vs. `LightNovel` domain models).
 * **Modern Architecture:** Standardized, layered modular structure adhering to Go best practices (`cmd/`, `internal/`).
 
@@ -35,7 +35,7 @@ Low-latency, high-throughput backend engine for the [Mangile](https://github.com
 | Category | Technology |
 | :--- | :--- |
 | **Language** | Go (Golang 1.22+) |
-| **Communication** | REST (HTTP/1.1 & HTTP/2 via `net/http`) |
+| **Communication** | REST (HTTP/1.1 & HTTP/2 via `echo framework`) |
 | **CMS & Data Sources** | Sanity CMS, AniList API, MyAnimeList (MAL) API |
 
 ---
