@@ -7,7 +7,7 @@ Low-latency, high-throughput backend engine for the [Mangile](https://github.com
 
 ## Overview
 
-`mangile-backend` is a scalable content serving and indexing service written in Go. Built with standard library efficiency (`echo`), clean architecture, and strict domain separation, it powers the backend capabilities of the Mangile ecosystem.
+`mangile-backend` is a scalable content serving and indexing service written in Go. Built with clean architecture and strict domain separation, it powers the backend capabilities of the Mangile ecosystem.
 
 ### Key Features
 
