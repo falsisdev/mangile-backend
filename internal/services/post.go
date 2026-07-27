@@ -11,7 +11,7 @@ import (
 func PostToSanity(document map[string]interface{}) error {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	token := os.Getenv("SANITY_TOKEN")
-	url := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/mutate/production", projectID) //Burdaki %s üstteki değişkenlerden string olan ilki olduğu için projectID'yi implante etmiş olduk
+	url := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/mutate/production", projectID)
 
 	payload := map[string]interface{}{
 		"mutations": []map[string]interface{}{
