@@ -13,24 +13,46 @@ import (
 func GetChapter(key string, filterType string) (models.Chapter, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 
-	query := fmt.Sprintf(`*[ _type == "%s" && "%s" in chapters[]._key ][0] {
-		myAnimeListId,
-		title,
-		_type,
-		"chapter": chapters[_key == "%s"][0] {
-			_key,
+	var query string
+	if filterType == "manga" {
+		query = fmt.Sprintf(`*[ _type == "%s" && "%s" in chapters[]._key ][0] {
+			myAnimeListId,
+			title,
 			_type,
-			chapterNumber,
-			"pages": pages[] {
-				"url": asset->url
+			"chapter": chapters[_key == "%s"][0] {
+				_key,
+				_type,
+				chapterNumber,
+				"pages": pages[] {
+					"url": asset->url
+				},
+				source-> {
+					name,
+					_id
+				}
 			},
-			source-> {
-				name,
-				_id
-			}
-		},
-		"chapterKeys": chapters[]._key
-	}`, filterType, key, key)
+			"chapterKeys": chapters[]._key
+		}`, filterType, key, key)
+	} else if filterType == "lightNovel" {
+		query = fmt.Sprintf(`*[ _type == "%s" && "%s" in chapters[]._key ][0] {
+			myAnimeListId,
+			title,
+			_type,
+			"chapter": chapters[_key == "%s"][0] {
+				_key,
+				_type,
+				chapterNumber,
+				content,
+				source-> {
+					name,
+					_id
+				}
+			},
+			"chapterKeys": chapters[]._key
+		}`, filterType, key, key)
+	}else {
+		return models.Chapter{}, fmt.Errorf("Geçersiz filtre türü: %s", filterType)
+	}
 
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 
