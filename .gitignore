@@ -2,6 +2,5 @@
 .idea
 .DS_Store
 /cmd/.DS_Store
-yapilacaklar.txt
 .vscode
 .env

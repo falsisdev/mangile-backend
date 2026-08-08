@@ -69,7 +69,10 @@ func GetManga(id string) (interface{}, error) {
 	}
 
 	if len(rawWrapper.Result) == 0 || string(rawWrapper.Result) == "null" {
-		return nil, fmt.Errorf("İçerik bulunamadı veya ID eşleşmedi: %s", id)
+		malID, _ := strconv.Atoi(id)
+		fallbackManga := buildMissingSanityManga(id, malID)
+		hydrateMangaWithExternalData(fallbackManga, fallbackManga.MalID)
+		return fallbackManga, nil
 	}
 
 	var typeCheck struct {
@@ -96,34 +99,7 @@ func GetManga(id string) (interface{}, error) {
 			Chapters:          sanityData.Chapters,
 			Notes:             sanityData.Notes,
 		}
-		if finalLightNovel.MalID != 0 {
-			if jikanData, err := fetchJikanMangaData(finalLightNovel.MalID); err == nil && jikanData != nil {
-				finalLightNovel.MalURL = jikanData.Data.MalURL
-				finalLightNovel.MalTitleJapanese = jikanData.Data.MalTitleJapanese
-				finalLightNovel.MalTitleEnglish = jikanData.Data.MalTitleEnglish
-				finalLightNovel.MalStatus = jikanData.Data.MalStatus
-				finalLightNovel.MalScore = jikanData.Data.MalScore
-				finalLightNovel.MalAuthors = jikanData.Data.MalAuthors
-				finalLightNovel.MalGenres = jikanData.Data.MalGenres
-				finalLightNovel.MalThemes = jikanData.Data.MalThemes
-			}
-			if aniListData, err := fetchAniListLightNovelData(finalLightNovel.MalID); err == nil && aniListData != nil {
-				media := aniListData.Data.Media
-				finalLightNovel.AniListID = media.AnilistID
-				finalLightNovel.AnilistTitle = media.AnilistTitle.Romaji
-				if finalLightNovel.AnilistTitle == "" {
-					finalLightNovel.AnilistTitle = media.AnilistTitle.English
-				}
-				finalLightNovel.AnilistScore = media.AnilistScore
-				finalLightNovel.AnilistDescription = media.AnilistDescription
-				finalLightNovel.AnilistBanner = media.AniListBanner
-				finalLightNovel.AnilistCover = media.AnilistCover.Large
-				finalLightNovel.AnilistTags = media.AnilistTags
-				finalLightNovel.AnilistTrending = media.AnilistTrending
-				finalLightNovel.AnilistSeasonYear = media.SeasonYear
-				finalLightNovel.AnilistRelations = media.Relations
-			}
-		}
+		hydrateLightNovelWithExternalData(finalLightNovel, finalLightNovel.MalID)
 		return finalLightNovel, nil
 	}
 
@@ -143,34 +119,7 @@ func GetManga(id string) (interface{}, error) {
 		Chapters:          sanityData.Chapters,
 		Notes:             sanityData.Notes,
 	}
-	if finalManga.MalID != 0 {
-		if jikanData, err := fetchJikanMangaData(finalManga.MalID); err == nil && jikanData != nil {
-			finalManga.MalURL = jikanData.Data.MalURL
-			finalManga.MalTitleJapanese = jikanData.Data.MalTitleJapanese
-			finalManga.MalTitleEnglish = jikanData.Data.MalTitleEnglish
-			finalManga.MalStatus = jikanData.Data.MalStatus
-			finalManga.MalScore = jikanData.Data.MalScore
-			finalManga.MalAuthors = jikanData.Data.MalAuthors
-			finalManga.MalGenres = jikanData.Data.MalGenres
-			finalManga.MalThemes = jikanData.Data.MalThemes
-		}
-		if aniListData, err := fetchAniListMangaData(finalManga.MalID); err == nil && aniListData != nil {
-			media := aniListData.Data.Media
-			finalManga.AniListID = media.AnilistID
-			finalManga.AnilistTitle = media.AnilistTitle.Romaji
-			if finalManga.AnilistTitle == "" {
-				finalManga.AnilistTitle = media.AnilistTitle.English
-			}
-			finalManga.AnilistScore = media.AnilistScore
-			finalManga.AnilistDescription = media.AnilistDescription
-			finalManga.AnilistBanner = media.AniListBanner
-			finalManga.AnilistCover = media.AnilistCover.Large
-			finalManga.AnilistTags = media.AnilistTags
-			finalManga.AnilistTrending = media.AnilistTrending
-			finalManga.AnilistSeasonYear = media.SeasonYear
-			finalManga.AnilistRelations = media.Relations
-		}
-	}
+	hydrateMangaWithExternalData(finalManga, finalManga.MalID)
 	return finalManga, nil
 }
 
@@ -191,4 +140,22 @@ func GetMangaRecommendations(id string) ([]models.AniListRecommendation, error) 
 		recommendations = append(recommendations, node.MediaRecommendation)
 	}
 	return recommendations, nil
+}
+
+func buildMissingSanityManga(id string, malID int) *models.Manga {
+	return &models.Manga{
+		ID:                id,
+		Type:              "manga",
+		SanityDataMissing: true,
+		MalID:             malID,
+	}
+}
+
+func buildMissingSanityLightNovel(id string, malID int) *models.LightNovel {
+	return &models.LightNovel{
+		ID:                id,
+		Type:              "lightNovel",
+		SanityDataMissing: true,
+		MalID:             malID,
+	}
 }
