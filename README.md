@@ -11,9 +11,9 @@ Low-latency, high-throughput backend engine for the [Mangile](https://github.com
 
 ### Key Features
 
-* **High-Performance Pipeline:** Leverages Go's native concurrent runtime and optimized `echo` stack for minimal overhead.
-* **Strict Domain Isolation:** Explicit segregation between distinct comic/media entities (e.g., `Manga` vs. `LightNovel` domain models).
-* **Modern Architecture:** Standardized, layered modular structure adhering to Go best practices (`cmd/`, `internal/`).
+- **High-Performance Pipeline:** Leverages Go's native concurrent runtime and optimized `echo` stack for minimal overhead.
+- **Strict Domain Isolation:** Explicit segregation between distinct comic/media entities (e.g., `Manga` vs. `LightNovel` domain models).
+- **Modern Architecture:** Standardized, layered modular structure adhering to Go best practices (`cmd/`, `internal/`).
 
 ---
 
@@ -32,10 +32,10 @@ Low-latency, high-throughput backend engine for the [Mangile](https://github.com
 
 ## Tech Stack
 
-| Category | Technology |
-| :--- | :--- |
-| **Language** | Go (Golang 1.22+) |
-| **Communication** | REST (HTTP/1.1 & HTTP/2 via `echo framework`) |
+| Category               | Technology                                     |
+| :--------------------- | :--------------------------------------------- |
+| **Language**           | Go (Golang 1.22+)                              |
+| **Communication**      | REST (HTTP/1.1 & HTTP/2 via `echo framework`)  |
 | **CMS & Data Sources** | Sanity CMS, AniList API, MyAnimeList (MAL) API |
 
 ---
@@ -44,22 +44,24 @@ Low-latency, high-throughput backend engine for the [Mangile](https://github.com
 
 ### Prerequisites
 
-* [Go](https://go.dev/doc/install) (v1.22 or higher)
-* Active [Sanity](https://sanity.io) project credentials
+- [Go](https://go.dev/doc/install) (v1.22 or higher)
+- Active [Sanity](https://sanity.io) project credentials
 
 ### Local Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/falsisdev/mangile-backend.git
    cd mangile-backend
    ```
 
 2. **Configure environment variables:**
-   
+
    Copy the example environment file and update it with your Sanity credentials:
+
    ```bash
-   cp .env.example ./cmd/api/.env
+   cp .env.example ./.env
    ```
 
 3. **Run the server:**
