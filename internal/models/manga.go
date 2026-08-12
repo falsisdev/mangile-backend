@@ -36,6 +36,7 @@ type SanityManga struct {
 	SanityTitle       string         `json:"title"`
 	SanityDescription string         `json:"description"`
 	SanityTags        []string       `json:"tags"`
+	UploadStatus      string         `json:"uploadStatus"`
 }
 
 type JikanMangaResponse struct {
@@ -176,6 +177,7 @@ type AniListRecommendationCoverImage struct {
 type Manga struct {
 	ID                 string                     `json:"id"`
 	Type               string                     `json:"type"`
+	UploadStatus       string                     `json:"uploadStatus"`
 	SanityTitle        string                     `json:"sanity_title,omitempty"`
 	SanityDescription  string                     `json:"sanity_description,omitempty"`
 	SanityBanner       string                     `json:"sanity_banner,omitempty"`
@@ -228,6 +230,7 @@ type SanityLightNovel struct {
 	SanityDescription string              `json:"description"`
 	MalID             int                 `json:"myAnimeListId"`
 	SanityTags        []string            `json:"tags"`
+	UploadStatus      string              `json:"uploadStatus"`
 }
 
 type JikanLightNovelResponse struct {
@@ -282,6 +285,7 @@ type AniListLightNovelMedia struct {
 type LightNovel struct {
 	ID                 string                     `json:"id"`
 	Type               string                     `json:"type"`
+	UploadStatus       string                     `json:"uploadStatus"`
 	SanityTitle        string                     `json:"sanity_title,omitempty"`
 	SanityDescription  string                     `json:"sanity_description,omitempty"`
 	SanityBanner       string                     `json:"sanity_banner,omitempty"`

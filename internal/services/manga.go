@@ -26,6 +26,7 @@ func GetManga(id string) (interface{}, error) {
 		title,
 		description,
 		tags,
+		uploadStatus,
 		"bannerImage": bannerImage.asset->url,
 		"coverImage": coverImage.asset->url,
 		"chapters": chapters[]{
@@ -90,6 +91,7 @@ func GetManga(id string) (interface{}, error) {
 		finalLightNovel := &models.LightNovel{
 			ID:                sanityData.ID,
 			Type:              sanityData.Type,
+			UploadStatus:      sanityData.UploadStatus,
 			SanityTitle:       sanityData.SanityTitle,
 			SanityDescription: sanityData.SanityDescription,
 			SanityBanner:      sanityData.SanityBanner,
@@ -118,6 +120,7 @@ func GetManga(id string) (interface{}, error) {
 		MalID:             sanityData.MalID,
 		Chapters:          sanityData.Chapters,
 		Notes:             sanityData.Notes,
+		UploadStatus:      sanityData.UploadStatus,
 	}
 	hydrateMangaWithExternalData(finalManga, finalManga.MalID)
 	return finalManga, nil
