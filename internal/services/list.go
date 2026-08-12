@@ -18,6 +18,7 @@ func GetList(id string) (*models.List, error) {
 	title,
 	createdAt,
 	items,
+	description,
 	user->{"id": _id, logtoId, name, avatar, username},
 	"likes": likes[]->{
 			  "id": _id,
