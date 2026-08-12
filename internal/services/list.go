@@ -13,7 +13,7 @@ import (
 func GetList(id string) (*models.List, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == "lists" && _id == "%s"][0]{
-	"id": _id,
+	_id,
 	_type,
 	title,
 	createdAt,

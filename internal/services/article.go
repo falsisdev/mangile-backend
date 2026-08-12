@@ -12,7 +12,7 @@ import (
 
 func GetArticle(slug string) (*models.Article, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
-	query := fmt.Sprintf(`*[_type == 'articles' && slug.current == "%s"][0]{..., "id": _id}`, slug)
+	query := fmt.Sprintf(`*[_type == 'articles' && slug.current == "%s"][0]{..., _id}`, slug)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
 	u, _ := url.Parse(baseURL)
 	q := u.Query()

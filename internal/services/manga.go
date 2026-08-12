@@ -33,7 +33,7 @@ func GetManga(id string) (interface{}, error) {
 			title,
 			_key,
 			"source": source -> {
-				"id": _id,
+				_id,
 				name
 			},
 			"pages": pages[]{

@@ -13,7 +13,7 @@ import (
 func GetSanityList(filterType string) ([]models.SanityList, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == 'manga' || _type == 'lightNovel'] | order(_%s desc){
-		"id": _id,
+		_id,
 		title,
 		myAnimeListId,
 		_createdAt,

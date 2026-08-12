@@ -13,7 +13,7 @@ import (
 func GetScan(id string) (*models.Scan, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == "scan" && _id == "%s"][0]{
-	"id": _id,
+	_id,
 	_type,
 	name,
 	description,

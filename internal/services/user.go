@@ -10,11 +10,10 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/models"
 )
 
-
 func GetUser(id string) (*models.User, error) {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	query := fmt.Sprintf(`*[_type == "auth" && logtoId == "%s"][0]{
-	"id": _id,
+	_id,
 	_type,
 	title,
 	_createdAt,
