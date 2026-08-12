@@ -19,7 +19,10 @@ func GetScan(id string) (*models.Scan, error) {
 	description,
 	"coverImage": coverImage.asset -> url,
 	"logo": logo.asset -> url,
-	members,
+	"members": members[]{
+		role,
+		"user": user->{_id, name, avatar, username}
+	},
 	website
 	}`, id)
 	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
