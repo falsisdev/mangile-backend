@@ -29,7 +29,8 @@ func GetChapter(key string, filterType string) (models.Chapter, error) {
 				source-> {
 					name,
 					_id
-				}
+				},
+				title
 			},
 			"chapterKeys": chapters[]._key
 		}`, filterType, key, key)
@@ -46,11 +47,12 @@ func GetChapter(key string, filterType string) (models.Chapter, error) {
 				source-> {
 					name,
 					_id
-				}
+				},
+				title
 			},
 			"chapterKeys": chapters[]._key
 		}`, filterType, key, key)
-	}else {
+	} else {
 		return models.Chapter{}, fmt.Errorf("Geçersiz filtre türü: %s", filterType)
 	}
 
