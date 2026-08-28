@@ -1,0 +1,28 @@
+*[_type == "auth" && logtoId == $id][0]{
+  _id,
+  _type,
+  _createdAt,
+  "avatar": avatar.asset->url,
+  "banner": banner.asset->url,
+  bio,
+  integrations,
+  roles,
+  logtoId,
+  name,
+  username,
+  "lists": lists[]->{
+    "id": _id,
+    _type,
+    title,
+    createdAt,
+    items,
+    user->{"id": _id, logtoId, name, "avatar": avatar.asset->url, username},
+    "likes": likes[]->{
+      "id": _id,
+      name,
+      "avatar": avatar.asset->url,
+      username,
+      logtoId
+    }
+  }
+}

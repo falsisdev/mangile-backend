@@ -1,0 +1,53 @@
+*[(_type == "mangaChapter" || _type == "novelChapter") && _id == $id] {
+  _createdAt,
+  _id,
+  _type,
+  _updatedAt,
+  chapterNumber,
+  title,
+  volumeNumber,
+  pages[] {
+    "url": asset->url
+  },
+  content,
+  manga->{
+    myAnimeListId,
+    title
+  },
+  lightNovel->{
+    myAnimeListId,
+    title
+  },
+  source->{
+    _id,
+    _type,
+    logo{
+      "url": asset->url
+    },
+    name,
+    website,
+  },
+  "chapters": *[(_type == "mangaChapter" || _type == "novelChapter")
+    && (
+      (defined(manga) && defined(^.manga) && manga->myAnimeListId == ^.manga->myAnimeListId)
+      || (defined(lightNovel) && defined(^.lightNovel) && lightNovel->myAnimeListId == ^.lightNovel->myAnimeListId)
+    )
+  ] | order(chapterNumber asc) {
+    _id,
+    title,
+    chapterNumber,
+    volumeNumber,
+    source->{
+      _id,
+      _type,
+      coverImage{
+        "url": asset->url
+      },
+      name,
+      logo{
+        "url": asset->url
+      },
+      website,
+    }
+  }
+}

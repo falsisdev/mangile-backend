@@ -1,0 +1,41 @@
+*[(_type == "manga" || _type == "lightNovel") && (_id == $id || myAnimeListId == $malId)] {
+  _createdAt,
+  _id,
+  _type,
+  _updatedAt,
+  bannerImage{
+    "url": asset->url
+  },
+  coverImage{
+    "url": asset->url
+  },
+  description,
+  myAnimeListId,
+  notes,
+  "slug": slug.current,
+  tags,
+  title,
+  uploadStatus,
+  "chapters": *[(_type == "mangaChapter" || _type == "novelChapter") && (manga._ref == ^._id || manga->myAnimeListId == $malId || lightNovel._ref == ^._id || lightNovel->myAnimeListId == $malId)] | order(chapterNumber asc) {
+    _createdAt,
+    _id,
+    title,
+    chapterNumber,
+    volumeNumber,
+    pages[] {
+      "url": asset->url
+    },
+    source->{
+      _id,
+      _type,
+      coverImage{
+        "url": asset->url
+      },
+      name,
+      logo{
+        "url": asset->url
+      },
+      website,
+    }
+  }
+}

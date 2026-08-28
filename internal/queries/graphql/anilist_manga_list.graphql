@@ -1,0 +1,38 @@
+query MangaList(
+  $page: Int
+  $perPage: Int
+  $search: String
+  $sort: [MediaSort]
+  $status: MediaStatus
+) {
+  Page(page: $page, perPage: $perPage) {
+    media(
+      type: MANGA
+      search: $search
+      sort: $sort
+      isAdult: false
+      countryOfOrigin: JP
+      status: $status
+    ) {
+      id
+      idMal
+      type
+      format
+      status
+      meanScore
+      bannerImage
+      description
+      startDate {
+        year
+      }
+      coverImage {
+        large
+      }
+      title {
+        romaji
+        english
+        native
+      }
+    }
+  }
+}

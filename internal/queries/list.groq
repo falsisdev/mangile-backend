@@ -1,0 +1,16 @@
+*[_type == "lists" && _id == $id][0]{
+  _id,
+  _type,
+  title,
+  createdAt,
+  items,
+  description,
+  user->{"id": _id, logtoId, name, "avatar": avatar.asset->url, username},
+  "likes": likes[]->{
+    "id": _id,
+    name,
+    "avatar": avatar.asset->url,
+    username,
+    logtoId
+  }
+}

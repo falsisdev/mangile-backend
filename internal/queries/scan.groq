@@ -1,0 +1,13 @@
+*[_type == "scan" && _id == $id][0]{
+  _id,
+  _type,
+  name,
+  description,
+  "coverImage": coverImage.asset->url,
+  "logo": logo.asset->url,
+  "members": members[]{
+    role,
+    "user": user->{_id, name, avatar, username}
+  },
+  website
+}

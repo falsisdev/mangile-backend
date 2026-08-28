@@ -1,0 +1,11 @@
+*[_type == "manga" || _type == "lightNovel"] | order(REPLACE_SORT_FIELD desc){
+  _id,
+  title,
+  myAnimeListId,
+  _createdAt,
+  _updatedAt,
+  _type,
+  tags,
+  "bannerImage": bannerImage.asset->url,
+  "coverImage": coverImage.asset->url
+}

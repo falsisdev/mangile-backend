@@ -1,0 +1,60 @@
+query MediaDetails($idMal: Int) {
+  Media(idMal: $idMal, type: MANGA) {
+    id
+    title {
+      romaji
+      english
+      native
+    }
+    trending
+    averageScore
+    bannerImage
+    coverImage {
+      extraLarge
+      large
+      medium
+      color
+    }
+    description
+    tags {
+      name
+    }
+    seasonYear
+    relations {
+      edges {
+        id
+        relationType
+        node {
+          id
+          idMal
+          type
+          meanScore
+          seasonYear
+          title {
+            romaji
+          }
+          coverImage {
+            extraLarge
+          }
+        }
+      }
+    }
+    recommendations(perPage: 5) {
+      nodes {
+        mediaRecommendation {
+          id
+          idMal
+          type
+          title {
+            romaji
+            english
+            native
+          }
+          coverImage {
+            extraLarge
+          }
+        }
+      }
+    }
+  }
+}

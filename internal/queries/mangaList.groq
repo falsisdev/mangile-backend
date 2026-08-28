@@ -1,0 +1,5 @@
+*[_type == "manga" && myAnimeListId in $ids]{
+  myAnimeListId,
+  description,
+  "bannerImage": bannerImage.asset->url
+}
