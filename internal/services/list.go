@@ -1,48 +1,23 @@
 package services
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
-	"os"
+	"context"
 
 	"github.com/falsisdev/mangile-backend/internal/models"
+	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-func GetList(id string) (*models.List, error) {
-	projectID := os.Getenv("SANITY_PROJECT_ID")
-	query := fmt.Sprintf(`*[_type == "lists" && _id == "%s"][0]{
-	_id,
-	_type,
-	title,
-	createdAt,
-	items,
-	description,
-	user->{"id": _id, logtoId, name, avatar, username},
-	"likes": likes[]->{
-			  "id": _id,
-			  name,
-			  avatar,
-			  username,
-			  logtoId
-			},
-	}`, id)
-	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
-	u, _ := url.Parse(baseURL)
-	q := u.Query()
-	q.Set("query", query)
-	u.RawQuery = q.Encode()
-	resp, err := http.Get(u.String())
+// GetList, verilen kimlikteki listeyi sahibi ve begenileriyle birlikte dondurur.
+func GetList(ctx context.Context, id string) (*models.List, error) {
+	sanity, err := newSanityClient()
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	var listWrapper struct {
-		Result models.List `json:"result"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&listWrapper); err != nil {
+
+	var list models.List
+	if err := sanity.query(ctx, queries.ListQuery, map[string]any{"id": id}, &list); err != nil {
 		return nil, err
 	}
-	return &listWrapper.Result, nil
+
+	return &list, nil
 }

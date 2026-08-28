@@ -13,7 +13,7 @@ func GetScanHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: Çeviri Ekibinin ID'si girilmemiş."})
 	}
 
-	scan, err := services.GetScan(id)
+	scan, err := services.GetScan(c.Request().Context(), id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

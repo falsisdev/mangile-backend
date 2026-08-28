@@ -1,125 +1,64 @@
 package services
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
+	"context"
 	"net/http"
-	"net/url"
-	"os"
-	"strconv"
-	"strings"
+	"time"
 
 	"github.com/falsisdev/mangile-backend/internal/models"
+	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-func GetMangaList(filterType string, limit int, page int, searchQuery string) ([]models.MangaCard, error) {
+func GetMangaList(ctx context.Context, filterType string, limit int, page int, searchQuery string) ([]models.MangaCard, error) {
 	if page < 1 {
 		page = 1
 	}
 
-	var sortParam string
-	var statusParam *string
+	// Arama yapilirken AniList'in varsayilan siralamasi kullanilir (sort: null).
+	var sort []string
+	var status any
 
-	if searchQuery != "" {
-		sortParam = ""
-	} else {
+	if searchQuery == "" {
 		switch filterType {
 		case "POPULAR":
-			sortParam = "sort: [POPULARITY_DESC],"
+			sort = []string{"POPULARITY_DESC"}
 		case "HIGHEST_SCORE":
-			sortParam = "sort: [SCORE_DESC],"
+			sort = []string{"SCORE_DESC"}
 		case "TRENDING":
-			sortParam = "sort: [TRENDING_DESC],"
+			sort = []string{"TRENDING_DESC"}
 		case "UPCOMING":
-			sortParam = "sort: [START_DATE_DESC],"
-			statusVal := "NOT_YET_RELEASED"
-			statusParam = &statusVal
+			sort = []string{"START_DATE_DESC"}
+			status = "NOT_YET_RELEASED"
 		default:
-			sortParam = "sort: [POPULARITY_DESC],"
+			sort = []string{"POPULARITY_DESC"}
 		}
 	}
 
-	query := fmt.Sprintf(`
-	query Media($type: MediaType, $isAdult: Boolean, $countryOfOrigin: CountryCode, $page: Int, $perPage: Int, $status: MediaStatus, $search: String) {
-		Page (page: $page, perPage: $perPage) {
-			media (type: $type, %s search: $search, isAdult: $isAdult, countryOfOrigin: $countryOfOrigin, status: $status) {
-				id
-				idMal
-				type
-				format
-				status
-				meanScore
-				bannerImage
-				description
-				startDate {
-					year
-				}
-				coverImage {
-					large
-				}
-				title {
-					romaji
-					english
-					native
-				}
-			}
-		}
-	}`, sortParam)
-
-	variables := map[string]interface{}{
-		"type":            "MANGA",
-		"page":            page,
-		"perPage":         limit,
-		"isAdult":         false,
-		"countryOfOrigin": "JP",
-		"status":          statusParam,
+	variables := map[string]any{
+		"page":    page,
+		"perPage": limit,
+		"search":  nil,
+		"sort":    sort,
 	}
 
-	if statusParam == nil {
-		delete(variables, "status")
+	if status != nil {
+		variables["status"] = status
 	}
 
 	if searchQuery != "" {
 		variables["search"] = searchQuery
 	}
 
-	requestBody, err := json.Marshal(map[string]interface{}{
-		"query":     query,
-		"variables": variables,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("[HATA]: Request body marshalling failed: %w", err)
-	}
-
-	req, err := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, fmt.Errorf("[HATA]: HTTP isteği oluşturulurken bir sorun oluştu: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("[HATA]: Anilist API isteğinde bir sorun oluştu: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("[HATA]: Anilist API durum kodu: %d\nyanıt: %s", resp.StatusCode, string(bodyBytes))
-	}
-
 	var aniListResp models.AniListListResponse
-	if err := json.NewDecoder(resp.Body).Decode(&aniListResp); err != nil {
-		return nil, fmt.Errorf("[HATA]: Anilist yanıtı çözümlenirken hata oluştu: %w", err)
+	httpClient := &http.Client{Timeout: 15 * time.Second}
+	if err := postAniListQuery(ctx, httpClient, queries.AniListMangaList, variables, &aniListResp); err != nil {
+		return nil, err
 	}
 
-	var malIDs []string
+	malIDs := make([]int, 0, len(aniListResp.Data.Page.Media))
 	for _, media := range aniListResp.Data.Page.Media {
 		if media.IDMal != 0 {
-			malIDs = append(malIDs, strconv.Itoa(media.IDMal))
+			malIDs = append(malIDs, media.IDMal)
 		}
 	}
 
@@ -128,41 +67,23 @@ func GetMangaList(filterType string, limit int, page int, searchQuery string) ([
 		BannerImage string
 	})
 
-	projectID := os.Getenv("SANITY_PROJECT_ID")
-	if len(malIDs) > 0 && projectID != "" {
-		idListStr := "[" + strings.Join(malIDs, ",") + "]"
+	// Sanity zenginlestirmesi zorunlu degil; erisilemezse AniList verisiyle devam edilir.
+	if len(malIDs) > 0 {
+		if sanity, sErr := newSanityClient(); sErr == nil {
+			var localTitles []struct {
+				MyAnimeListId int    `json:"myAnimeListId"`
+				Description   string `json:"description"`
+				BannerImage   string `json:"bannerImage"`
+			}
 
-		sanityQuery := fmt.Sprintf(`*[_type == "manga" && myAnimeListId in %s]{
-			myAnimeListId,
-			description,
-			"bannerImage": bannerImage.asset->url
-		}`, idListStr)
-
-		baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
-		u, _ := url.Parse(baseURL)
-		q := u.Query()
-		q.Set("query", sanityQuery)
-		u.RawQuery = q.Encode()
-
-		if sResp, sErr := http.Get(u.String()); sErr == nil {
-			defer sResp.Body.Close()
-			if sResp.StatusCode == http.StatusOK {
-				var sanityListWrapper struct {
-					Result []struct {
-						MyAnimeListId int    `json:"myAnimeListId"`
-						Description   string `json:"description"`
-						BannerImage   string `json:"bannerImage"`
-					} `json:"result"`
-				}
-				if json.NewDecoder(sResp.Body).Decode(&sanityListWrapper) == nil {
-					for _, item := range sanityListWrapper.Result {
-						sanityMatches[item.MyAnimeListId] = struct {
-							Description string
-							BannerImage string
-						}{
-							Description: item.Description,
-							BannerImage: item.BannerImage,
-						}
+			if qErr := sanity.query(ctx, queries.MangaListQuery, map[string]any{"ids": malIDs}, &localTitles); qErr == nil {
+				for _, item := range localTitles {
+					sanityMatches[item.MyAnimeListId] = struct {
+						Description string
+						BannerImage string
+					}{
+						Description: item.Description,
+						BannerImage: item.BannerImage,
 					}
 				}
 			}

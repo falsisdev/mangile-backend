@@ -1,43 +1,43 @@
 package services
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
-	"os"
+	"context"
+	"errors"
+	"strings"
 
 	"github.com/falsisdev/mangile-backend/internal/models"
+	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-func GetSanityList(filterType string) ([]models.SanityList, error) {
-	projectID := os.Getenv("SANITY_PROJECT_ID")
-	query := fmt.Sprintf(`*[_type == 'manga' || _type == 'lightNovel'] | order(_%s desc){
-		_id,
-		title,
-		myAnimeListId,
-		_createdAt,
-		_updatedAt,
-		_type,
-		tags,
-		"bannerImage": bannerImage.asset->url,
-		"coverImage": coverImage.asset->url
-	}`, filterType)
-	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
-	u, _ := url.Parse(baseURL)
-	q := u.Query()
-	q.Set("query", query)
-	u.RawQuery = q.Encode()
-	resp, err := http.Get(u.String())
+// sanityListSortFields, /api/sanityList ucundaki filterType degerlerini
+// GROQ siralama alanlarina esler. Kullanici girisi dogrudan sorguya
+// giremedigi icin degerler beyaz listede tutulur.
+var sanityListSortFields = map[string]string{
+	"createdAt": "_createdAt",
+	"updatedAt": "_updatedAt",
+}
+
+// ErrInvalidSortField, gecersiz siralama alani istendiginde dondurulur.
+var ErrInvalidSortField = errors.New("geçersiz sıralama alanı")
+
+// GetSanityList, yerel tum serileri istenen alana gore azalan siralar.
+func GetSanityList(ctx context.Context, filterType string) ([]models.SanityList, error) {
+	sortField, ok := sanityListSortFields[filterType]
+	if !ok {
+		return nil, ErrInvalidSortField
+	}
+
+	sanity, err := newSanityClient()
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	var sanityListWrapper struct {
-		Result []models.SanityList `json:"result"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&sanityListWrapper); err != nil {
+
+	query := strings.ReplaceAll(queries.SanityListQuery, "REPLACE_SORT_FIELD", sortField)
+
+	var sanityList []models.SanityList
+	if err := sanity.query(ctx, query, nil, &sanityList); err != nil {
 		return nil, err
 	}
-	return sanityListWrapper.Result, nil
+
+	return sanityList, nil
 }

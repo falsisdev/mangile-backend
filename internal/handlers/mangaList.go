@@ -46,7 +46,7 @@ func GetMangaListHandler(c echo.Context) error {
 		}
 	}
 
-	mangaList, err := services.GetMangaList(filterType, parsedLimit, parsedPage, searchQuery)
+	mangaList, err := services.GetMangaList(c.Request().Context(), filterType, parsedLimit, parsedPage, searchQuery)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"code":    500,

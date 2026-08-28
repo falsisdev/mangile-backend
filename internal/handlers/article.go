@@ -13,7 +13,7 @@ func GetArticleHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: Makalenin Slug'ı girilmemiş."})
 	}
 
-	article, err := services.GetArticle(slug)
+	article, err := services.GetArticle(c.Request().Context(), slug)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

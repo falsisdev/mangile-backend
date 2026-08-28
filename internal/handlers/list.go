@@ -13,7 +13,7 @@ func GetListHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: Listenin ID'si girilmemiş."})
 	}
 
-	list, err := services.GetList(id)
+	list, err := services.GetList(c.Request().Context(), id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
