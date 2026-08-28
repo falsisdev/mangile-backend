@@ -25,6 +25,7 @@ Low-latency, high-throughput backend engine for the [Mangile](https://github.com
 └── internal/        # Private application and domain logic
     ├── handlers/    # Transport protocol handlers (HTTP/REST)
     ├── models/      # Core data models and schema definitions
+    ├── queries/     # GROQ and GraphQL query files
     └── services/    # Business logic implementations & external integrations
 ```
 
