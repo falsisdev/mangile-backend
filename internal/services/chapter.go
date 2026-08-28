@@ -1,81 +1,32 @@
 package services
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
-	"os"
+	"context"
+	"errors"
 
 	"github.com/falsisdev/mangile-backend/internal/models"
+	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-func GetChapter(key string, filterType string) (models.Chapter, error) {
-	projectID := os.Getenv("SANITY_PROJECT_ID")
+// ErrChapterNotFound, istenen bölüm dokümanı Sanity'de bulunamadığında döndürülür.
+var ErrChapterNotFound = errors.New("bölüm bulunamadı")
 
-	var query string
-	if filterType == "manga" {
-		query = fmt.Sprintf(`*[ _type == "%s" && "%s" in chapters[]._key ][0] {
-			myAnimeListId,
-			title,
-			_type,
-			"chapter": chapters[_key == "%s"][0] {
-				_key,
-				_type,
-				chapterNumber,
-				"pages": pages[] {
-					"url": asset->url
-				},
-				source-> {
-					name,
-					_id
-				},
-				title
-			},
-			"chapterKeys": chapters[]._key
-		}`, filterType, key, key)
-	} else if filterType == "lightNovel" {
-		query = fmt.Sprintf(`*[ _type == "%s" && "%s" in chapters[]._key ][0] {
-			myAnimeListId,
-			title,
-			_type,
-			"chapter": chapters[_key == "%s"][0] {
-				_key,
-				_type,
-				chapterNumber,
-				content,
-				source-> {
-					name,
-					_id
-				},
-				title
-			},
-			"chapterKeys": chapters[]._key
-		}`, filterType, key, key)
-	} else {
-		return models.Chapter{}, fmt.Errorf("Geçersiz filtre türü: %s", filterType)
-	}
-
-	baseURL := fmt.Sprintf("https://%s.api.sanity.io/v2021-10-21/data/query/production", projectID)
-
-	u, _ := url.Parse(baseURL)
-	q := u.Query()
-	q.Set("query", query)
-	u.RawQuery = q.Encode()
-
-	resp, err := http.Get(u.String())
+// GetChapter, verilen kimlikteki manga/novel bölümünü, bağlı olduğu eserle ve
+// aynı eserin tüm bölümleriyle birlikte döndürür.
+func GetChapter(ctx context.Context, id string) (models.ChapterDetails, error) {
+	sanity, err := newSanityClient()
 	if err != nil {
-		return models.Chapter{}, err
-	}
-	defer resp.Body.Close()
-
-	var chapterWrapper struct {
-		Result models.Chapter `json:"result"`
+		return models.ChapterDetails{}, err
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&chapterWrapper); err != nil {
-		return models.Chapter{}, err
+	var results []models.ChapterDetails
+	if err := sanity.query(ctx, queries.ChapterQuery, map[string]any{"id": id}, &results); err != nil {
+		return models.ChapterDetails{}, err
 	}
 
-	return chapterWrapper.Result, nil
+	if len(results) == 0 {
+		return models.ChapterDetails{}, ErrChapterNotFound
+	}
+
+	return results[0], nil
 }

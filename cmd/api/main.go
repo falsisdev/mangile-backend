@@ -4,11 +4,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/falsisdev/mangile-backend/internal/handlers"
+	"github.com/falsisdev/mangile-backend/internal/services"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/falsisdev/mangile-backend/internal/handlers"
 )
 
 func main() {
@@ -17,12 +17,18 @@ func main() {
 		log.Fatalf("[HATA]: .env yüklenemedi: %v", err)
 	}
 
+	jikanService := services.NewJikanService()
+	aniListService := services.NewAniListService()
+
+	titleWorker := services.NewTitleDetailsWorker(jikanService, aniListService)
+	titleHandler := handlers.NewTitleHandler(titleWorker)
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000", "https://mangile.vercel.app"},
+		AllowOrigins: []string{"http://localhost:3000", "https://vercel.app"},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 	}))
@@ -31,8 +37,7 @@ func main() {
 		return c.String(http.StatusOK, "[✅]: Sunucu başarıyla başlatıldı.")
 	})
 
-	e.GET("/api/manga/:id", handlers.GetMangaHandler)
-	e.GET("/api/manga/:id/recommendations", handlers.GetMangaRecommendationsHandler)
+	e.GET("/api/titles", titleHandler.GetTitleDetails)
 	e.GET("/api/scan/:id", handlers.GetScanHandler)
 	e.GET("/api/list/:id", handlers.GetListHandler)
 	e.GET("/api/user/:id", handlers.GetUserHandler)
@@ -41,5 +46,5 @@ func main() {
 	e.GET("/api/sanityList", handlers.GetSanityListHandler)
 	e.GET("/api/chapter", handlers.GetChapterHandler)
 
-	e.Logger.Fatal(e.Start(":3001"))
+	e.Logger.Fatal(e.Start(":2611"))
 }

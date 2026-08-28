@@ -13,14 +13,14 @@ type AniListListPage struct {
 }
 
 type AniListListMedia struct {
-	ID          int               `json:"id"`
-	IDMal       int               `json:"idMal"`
-	Title       AniListMangaTitle `json:"title"`
-	Type        string            `json:"type"`
-	Format      string            `json:"format"`
-	Status      string            `json:"status"`
-	MeanScore   int               `json:"meanScore"`
-	Description string            `json:"description"`
+	ID          int          `json:"id"`
+	IDMal       int          `json:"idMal"`
+	Title       AniListTitle `json:"title"`
+	Type        string       `json:"type"`
+	Format      string       `json:"format"`
+	Status      string       `json:"status"`
+	MeanScore   int          `json:"meanScore"`
+	Description string       `json:"description"`
 	CoverImage  struct {
 		Large string `json:"large"`
 	} `json:"coverImage"`

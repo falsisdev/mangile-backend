@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/falsisdev/mangile-backend/internal/services"
@@ -8,16 +9,16 @@ import (
 )
 
 func GetChapterHandler(c echo.Context) error {
-	filterType := c.QueryParam("filterType")
-	key := c.QueryParam("key")
-	if filterType == "" {
-		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: filterType parametresi girilmemiş."})
+	id := c.QueryParam("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: id parametresi girilmemiş."})
 	}
-	if key == "" {
-		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: key parametresi girilmemiş."})
-	}
-	chapter, err := services.GetChapter(key, filterType)
+
+	chapter, err := services.GetChapter(c.Request().Context(), id)
 	if err != nil {
+		if errors.Is(err, services.ErrChapterNotFound) {
+			return c.JSON(http.StatusNotFound, map[string]any{"code": 404, "message": "[HATA]: Bölüm bulunamadı."})
+		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
