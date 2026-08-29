@@ -10,14 +10,20 @@
     lightNovel->{
       title,
       myAnimeListId,
-      _id
+      _id,
+      coverImage{
+        "url": asset->url
+      }
     }
   },
   defined(manga)=>{
     manga->{
       title,
       myAnimeListId,
-      _id
+      _id,
+      coverImage{
+        "url": asset->url
+      }
     }
   },
   source->{

@@ -5,9 +5,10 @@ import "time"
 // LatestChapterTitleRef, son yüklenen bölümün bağlı olduğu ana eserin kısa
 // bilgisidir (manga-> veya lightNovel-> dereference).
 type LatestChapterTitleRef struct {
-	ID            string `json:"_id,omitempty"`
-	Title         string `json:"title,omitempty"`
-	MyAnimeListID int    `json:"myAnimeListId,omitempty"`
+	ID            string     `json:"_id,omitempty"`
+	Title         string     `json:"title,omitempty"`
+	MyAnimeListID int        `json:"myAnimeListId,omitempty"`
+	CoverImage    ImageAsset `json:"coverImage"`
 }
 
 // LatestChapter, /api/latestChapters yanıtındaki tek bir bölümü temsil eder.
