@@ -5,9 +5,6 @@
 // Parametrelendirme kurallari:
 //   - GROQ: kullanici kaynakli degerler asla sorgu metnine serpistirilmez;
 //     $param olarak gonderilir (bkz. services.sanityClient.query).
-//   - Yalnizca GROQ'un parametrelendiremedigi dinamik parcalar icin
-//     (siralama alani gibi) REPLACE_* placeholder'lari kullanilir ve servis
-//     katmaninda beyaz listeyle degistirilir.
 package queries
 
 import _ "embed"
@@ -51,17 +48,29 @@ var ArticleQuery string
 //go:embed scan.groq
 var ScanQuery string
 
-// SanityListQuery, /api/sanityList ucunda tum yerel serileri dondurur.
-// REPLACE_SORT_FIELD alani servis katmaninda beyaz listeden gelir.
+// LatestTitlesQuery, /api/latestTitles ucunda tum yerel serileri en son
+// eklenene gore azalan dondurur.
 //
-//go:embed sanityList.groq
-var SanityListQuery string
+//go:embed latestTitles.groq
+var LatestTitlesQuery string
+
+// TitlesByTagQuery, /api/titlesByTag ucunda verilen etikete sahip yerel
+// serileri dondurur; etiket $tag GROQ parametresi olarak gonderilir.
+//
+//go:embed titlesByTag.groq
+var TitlesByTagQuery string
 
 // MangaListQuery, /api/mangaList ucunda AniList sonuclarini yerel icerikle
 // zenginlestirmek icin kullanilir.
 //
 //go:embed mangaList.groq
 var MangaListQuery string
+
+// LatestChaptersQuery, /api/latestChapters ucunda en son yüklenen 20
+// manga/novel bölümünü _createdAt alanina göre azalan siralayarak dondurur.
+//
+//go:embed latestChapters.groq
+var LatestChaptersQuery string
 
 // ---------------------------------------------------------------
 // GraphQL

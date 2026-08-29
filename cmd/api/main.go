@@ -43,8 +43,10 @@ func main() {
 	e.GET("/api/user/:id", handlers.GetUserHandler)
 	e.GET("/api/article/:slug", handlers.GetArticleHandler)
 	e.GET("/api/mangaList", handlers.GetMangaListHandler)
-	e.GET("/api/sanityList", handlers.GetSanityListHandler)
+	e.GET("/api/latestTitles", handlers.GetLatestTitlesHandler)
+	e.GET("/api/titlesByTag", handlers.GetTitlesByTagHandler)
 	e.GET("/api/chapter", handlers.GetChapterHandler)
+	e.GET("/api/latestChapters", handlers.GetLatestChaptersHandler)
 
 	e.Logger.Fatal(e.Start(":2611"))
 }

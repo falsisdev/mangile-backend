@@ -1,4 +1,4 @@
-*[_type == "manga" || _type == "lightNovel"] | order(REPLACE_SORT_FIELD desc){
+*[_type == "manga" || _type == "lightNovel"] | order(_createdAt desc){
   _id,
   title,
   myAnimeListId,

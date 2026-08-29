@@ -1,0 +1,27 @@
+*[(_type == "mangaChapter" || _type == "novelChapter")] | order(_createdAt desc) {
+  _createdAt,
+  _id,
+  _type,
+  _updatedAt,
+  chapterNumber,
+  volumeNumber,
+  title,
+  defined(lightNovel)=>{
+    lightNovel->{
+      title,
+      myAnimeListId,
+      _id
+    }
+  },
+  defined(manga)=>{
+    manga->{
+      title,
+      myAnimeListId,
+      _id
+    }
+  },
+  source->{
+    name,
+    website
+  }
+}[0...20]

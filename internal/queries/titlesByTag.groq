@@ -1,0 +1,14 @@
+*[(_type == "manga" || _type == "lightNovel") && ($tag in tags)] {
+  _createdAt,
+  _id,
+  _type,
+  _updatedAt,
+  coverImage{
+    "url": asset->url
+  },
+  description,
+  myAnimeListId,
+  "slug": slug.current,
+  tags,
+  title
+}[0...20]
