@@ -16,12 +16,14 @@ func GetLocalTitlesHandler(c echo.Context) error {
 	titleType := c.QueryParam("type")
 	tag := c.QueryParam("tag")
 	status := c.QueryParam("status")
+	sort := c.QueryParam("sort")
 
 	filter := services.LocalTitlesFilter{
 		Search: search,
 		Type:   titleType,
 		Tag:    tag,
 		Status: status,
+		Sort:   sort,
 		Page:   page,
 		Limit:  limit,
 	}

@@ -4,6 +4,8 @@ query MangaList(
   $search: String
   $sort: [MediaSort]
   $status: MediaStatus
+  $format: MediaFormat
+  $genre: String
 ) {
   Page(page: $page, perPage: $perPage) {
     media(
@@ -13,6 +15,8 @@ query MangaList(
       isAdult: false
       countryOfOrigin: JP
       status: $status
+      format: $format
+      genre: $genre
     ) {
       id
       idMal

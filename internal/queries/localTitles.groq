@@ -5,7 +5,14 @@
     && ($tag == "" || $tag in tags)
     && ($status == "" || uploadStatus == $status)
     && ($search == "" || title match $search + "*")
-  ] | order(_createdAt desc) [$start..$end] {
+  ] | order(
+    select(
+      $sort == "title_asc" => title asc,
+      $sort == "title_desc" => title desc,
+      $sort == "date_asc" => _createdAt asc,
+      _createdAt desc
+    )
+  ) [$start..$end] {
     _id,
     _type,
     _createdAt,

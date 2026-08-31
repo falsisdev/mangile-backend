@@ -13,26 +13,24 @@ func GetMangaListHandler(c echo.Context) error {
 	limit := c.QueryParam("limit")
 	page := c.QueryParam("page")
 	searchQuery := c.QueryParam("query")
-
-	if filterType == "" {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"code":    400,
-			"message": "[HATA]: filterType parametresi girilmemiş.",
-		})
+	if searchQuery == "" {
+		searchQuery = c.QueryParam("search")
 	}
-	if limit == "" {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"code":    400,
-			"message": "[HATA]: limit parametresi girilmemiş.",
-		})
-	}
+	sortParam := c.QueryParam("sort")
+	formatParam := c.QueryParam("format")
+	genreParam := c.QueryParam("genre")
+	statusParam := c.QueryParam("status")
 
-	parsedLimit, err := strconv.Atoi(limit)
-	if err != nil || parsedLimit < 1 {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"code":    400,
-			"message": "[HATA]: limit parametresi geçerli bir pozitif sayı olmalıdır.",
-		})
+	parsedLimit := 50
+	var err error
+	if limit != "" {
+		parsedLimit, err = strconv.Atoi(limit)
+		if err != nil || parsedLimit < 1 {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"code":    400,
+				"message": "[HATA]: limit parametresi geçerli bir pozitif sayı olmalıdır.",
+			})
+		}
 	}
 
 	parsedPage := 1
@@ -46,7 +44,11 @@ func GetMangaListHandler(c echo.Context) error {
 		}
 	}
 
-	mangaList, err := services.GetMangaList(c.Request().Context(), filterType, parsedLimit, parsedPage, searchQuery)
+	if filterType == "" && sortParam == "" {
+		filterType = "POPULAR"
+	}
+
+	mangaList, err := services.GetMangaList(c.Request().Context(), filterType, parsedLimit, parsedPage, searchQuery, sortParam, formatParam, genreParam, statusParam)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"code":    500,

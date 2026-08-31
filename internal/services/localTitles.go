@@ -13,6 +13,7 @@ type LocalTitlesFilter struct {
 	Type   string
 	Tag    string
 	Status string
+	Sort   string
 	Page   int
 	Limit  int
 }
@@ -39,6 +40,7 @@ func GetLocalTitles(ctx context.Context, filter LocalTitlesFilter) (*models.Loca
 		"type":   filter.Type,
 		"tag":    filter.Tag,
 		"status": filter.Status,
+		"sort":   filter.Sort,
 		"start":  start,
 		"end":    end,
 	}

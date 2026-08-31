@@ -9,16 +9,17 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-func GetMangaList(ctx context.Context, filterType string, limit int, page int, searchQuery string) ([]models.MangaCard, error) {
+func GetMangaList(ctx context.Context, filterType string, limit int, page int, searchQuery string, sortParam string, formatParam string, genreParam string, statusParam string) ([]models.MangaCard, error) {
 	if page < 1 {
 		page = 1
 	}
 
-	// Arama yapilirken AniList'in varsayilan siralamasi kullanilir (sort: null).
 	var sort []string
 	var status any
 
-	if searchQuery == "" {
+	if sortParam != "" {
+		sort = []string{sortParam}
+	} else if searchQuery == "" {
 		switch filterType {
 		case "POPULAR":
 			sort = []string{"POPULARITY_DESC"}
@@ -34,6 +35,10 @@ func GetMangaList(ctx context.Context, filterType string, limit int, page int, s
 		}
 	}
 
+	if statusParam != "" {
+		status = statusParam
+	}
+
 	variables := map[string]any{
 		"page":    page,
 		"perPage": limit,
@@ -43,6 +48,12 @@ func GetMangaList(ctx context.Context, filterType string, limit int, page int, s
 
 	if status != nil {
 		variables["status"] = status
+	}
+	if formatParam != "" {
+		variables["format"] = formatParam
+	}
+	if genreParam != "" {
+		variables["genre"] = genreParam
 	}
 
 	if searchQuery != "" {
