@@ -1,0 +1,29 @@
+{
+  "data": *[
+    (_type == "manga" || _type == "lightNovel")
+    && ($type == "" || _type == $type)
+    && ($tag == "" || $tag in tags)
+    && ($status == "" || uploadStatus == $status)
+    && ($search == "" || title match $search + "*")
+  ] | order(_createdAt desc) [$start..$end] {
+    _id,
+    _type,
+    _createdAt,
+    _updatedAt,
+    title,
+    "slug": slug.current,
+    myAnimeListId,
+    description,
+    uploadStatus,
+    tags,
+    "coverImage": coverImage.asset->url,
+    "bannerImage": bannerImage.asset->url
+  },
+  "total": count(*[
+    (_type == "manga" || _type == "lightNovel")
+    && ($type == "" || _type == $type)
+    && ($tag == "" || $tag in tags)
+    && ($status == "" || uploadStatus == $status)
+    && ($search == "" || title match $search + "*")
+  ])
+}

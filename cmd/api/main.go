@@ -47,6 +47,8 @@ func main() {
 	e.GET("/api/titlesByTag", handlers.GetTitlesByTagHandler)
 	e.GET("/api/chapter", handlers.GetChapterHandler)
 	e.GET("/api/latestChapters", handlers.GetLatestChaptersHandler)
+	e.GET("/api/localTitles", handlers.GetLocalTitlesHandler)
+
 
 	e.Logger.Fatal(e.Start(":2611"))
 }

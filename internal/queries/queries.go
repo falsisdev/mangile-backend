@@ -72,6 +72,12 @@ var MangaListQuery string
 //go:embed latestChapters.groq
 var LatestChaptersQuery string
 
+// LocalTitlesQuery, /api/localTitles ucunda yerel serileri filtreli ve sayfali dondurur.
+//
+//go:embed localTitles.groq
+var LocalTitlesQuery string
+
+
 // ---------------------------------------------------------------
 // GraphQL
 // ---------------------------------------------------------------
