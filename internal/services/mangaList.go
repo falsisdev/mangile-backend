@@ -120,6 +120,13 @@ func GetMangaList(ctx context.Context, filterType string, limit int, page int, s
 			}
 		}
 
+		mediaFormat := media.Format
+		if media.CountryOfOrigin == "KR" {
+			mediaFormat = "Manhwa"
+		} else if media.CountryOfOrigin == "CN" || media.CountryOfOrigin == "TW" || media.CountryOfOrigin == "HK" {
+			mediaFormat = "Manhua"
+		}
+
 		card := models.MangaCard{
 			AniListID:          media.ID,
 			MyAnimeListID:      media.IDMal,
@@ -134,7 +141,7 @@ func GetMangaList(ctx context.Context, filterType string, limit int, page int, s
 			CoverImage:         media.CoverImage.Large,
 			BannerImage:        bannerImg,
 			AniListDescription: media.Description,
-			MalType:            media.Format,
+			MalType:            mediaFormat,
 			MalYear:            media.StartDate.Year,
 			HasLocalContent:    hasLocal,
 			SanityDescription:  sanityDesc,

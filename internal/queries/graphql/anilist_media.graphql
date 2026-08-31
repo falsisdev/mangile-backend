@@ -1,6 +1,8 @@
 query MediaDetails($idMal: Int) {
   Media(idMal: $idMal, type: MANGA) {
     id
+    countryOfOrigin
+    format
     title {
       romaji
       english

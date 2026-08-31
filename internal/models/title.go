@@ -44,6 +44,7 @@ type TitleMedia struct {
 	UploadStatus      string       `json:"uploadStatus,omitempty"`
 	Notes             []any        `json:"notes,omitempty"`
 	Tags              []string     `json:"tags,omitempty"`
+	Format            string       `json:"format,omitempty"`
 	BannerImage       ImageAsset   `json:"bannerImage"`
 	CoverImage        ImageAsset   `json:"coverImage"`
 	Chapters          []Chapter    `json:"chapters,omitempty"`
@@ -62,6 +63,7 @@ type JikanResponse struct {
 
 type JikanData struct {
 	MalURL           string  `json:"url"`
+	MalType          string  `json:"type"`
 	MalTitleJapanese string  `json:"title_japanese"`
 	MalTitleEnglish  string  `json:"title_english"`
 	MalStatus        string  `json:"status"`
@@ -146,6 +148,8 @@ func (c *AniListRelationsConnection) UnmarshalJSON(data []byte) error {
 
 type AniListData struct {
 	AnilistID          int                              `json:"id"`
+	CountryOfOrigin    string                           `json:"countryOfOrigin,omitempty"`
+	Format             string                           `json:"format,omitempty"`
 	AnilistTitle       AniListTitle                     `json:"title"`
 	AnilistTrending    int                              `json:"trending"`
 	AnilistScore       float64                          `json:"averageScore"`

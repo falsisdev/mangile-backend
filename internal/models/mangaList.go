@@ -16,9 +16,10 @@ type AniListListMedia struct {
 	ID          int          `json:"id"`
 	IDMal       int          `json:"idMal"`
 	Title       AniListTitle `json:"title"`
-	Type        string       `json:"type"`
-	Format      string       `json:"format"`
-	Status      string       `json:"status"`
+	Type            string       `json:"type"`
+	Format          string       `json:"format"`
+	CountryOfOrigin string       `json:"countryOfOrigin"`
+	Status          string       `json:"status"`
 	MeanScore   int          `json:"meanScore"`
 	Description string       `json:"description"`
 	CoverImage  struct {

@@ -5,8 +5,12 @@ import "time"
 // ChapterTitleRef, bölümün bağlı olduğu ana eserin kısa bilgisidir
 // (manga-> veya lightNovel-> dereference).
 type ChapterTitleRef struct {
-	MyAnimeListID int    `json:"myAnimeListId,omitempty"`
-	Title         string `json:"title,omitempty"`
+	ID            string   `json:"_id,omitempty"`
+	Type          string   `json:"_type,omitempty"`
+	MyAnimeListID int      `json:"myAnimeListId,omitempty"`
+	Title         string   `json:"title,omitempty"`
+	Tags          []string `json:"tags,omitempty"`
+	Format        string   `json:"format,omitempty"`
 }
 
 // ChapterListItem, bölüm sayfasındaki bölüm listesindeki tek bir bölümü temsil eder

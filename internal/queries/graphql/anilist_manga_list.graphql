@@ -13,7 +13,6 @@ query MangaList(
       search: $search
       sort: $sort
       isAdult: false
-      countryOfOrigin: JP
       status: $status
       format: $format
       genre: $genre
@@ -22,6 +21,7 @@ query MangaList(
       idMal
       type
       format
+      countryOfOrigin
       status
       meanScore
       bannerImage

@@ -11,8 +11,12 @@
   },
   content,
   manga->{
+    _id,
+    _type,
     myAnimeListId,
-    title
+    title,
+    tags,
+    format
   },
   lightNovel->{
     myAnimeListId,
