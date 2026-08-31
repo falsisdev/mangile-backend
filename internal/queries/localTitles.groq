@@ -4,15 +4,8 @@
     && ($type == "" || _type == $type)
     && ($tag == "" || $tag in tags)
     && ($status == "" || uploadStatus == $status)
-    && ($search == "" || title match $search + "*")
-  ] | order(
-    select(
-      $sort == "title_asc" => title asc,
-      $sort == "title_desc" => title desc,
-      $sort == "date_asc" => _createdAt asc,
-      _createdAt desc
-    )
-  ) [$start..$end] {
+    && ($search == "" || title match $search)
+  ] | %ORDER% [$start..$end] {
     _id,
     _type,
     _createdAt,
@@ -31,6 +24,6 @@
     && ($type == "" || _type == $type)
     && ($tag == "" || $tag in tags)
     && ($status == "" || uploadStatus == $status)
-    && ($search == "" || title match $search + "*")
+    && ($search == "" || title match $search)
   ])
 }

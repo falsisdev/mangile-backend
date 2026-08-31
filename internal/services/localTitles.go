@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strings"
 
 	"github.com/falsisdev/mangile-backend/internal/models"
 	"github.com/falsisdev/mangile-backend/internal/queries"
@@ -35,18 +36,36 @@ func GetLocalTitles(ctx context.Context, filter LocalTitlesFilter) (*models.Loca
 	start := (filter.Page - 1) * filter.Limit
 	end := start + filter.Limit - 1
 
+	var orderClause string
+	switch filter.Sort {
+	case "title_asc":
+		orderClause = "order(title asc)"
+	case "title_desc":
+		orderClause = "order(title desc)"
+	case "date_asc":
+		orderClause = "order(_createdAt asc)"
+	default:
+		orderClause = "order(_createdAt desc)"
+	}
+
+	query := strings.Replace(queries.LocalTitlesQuery, "%ORDER%", orderClause, 1)
+
+	searchParam := filter.Search
+	if searchParam != "" {
+		searchParam = "*" + searchParam + "*"
+	}
+
 	params := map[string]any{
-		"search": filter.Search,
+		"search": searchParam,
 		"type":   filter.Type,
 		"tag":    filter.Tag,
 		"status": filter.Status,
-		"sort":   filter.Sort,
 		"start":  start,
 		"end":    end,
 	}
 
 	var result models.LocalTitlesQueryResult
-	if err := sanity.query(ctx, queries.LocalTitlesQuery, params, &result); err != nil {
+	if err := sanity.query(ctx, query, params, &result); err != nil {
 		return nil, err
 	}
 
