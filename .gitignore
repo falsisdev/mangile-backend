@@ -4,3 +4,5 @@
 /cmd/.DS_Store
 .vscode
 .env
+# Antigravity Local Rules & Context
+.agy/
