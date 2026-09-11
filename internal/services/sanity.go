@@ -15,9 +15,19 @@ const (
 	sanityDataset    = "production"
 )
 
+type draftContextKey struct{}
+
+// WithDrafts, context'i draft perspektifiyle Sanity sorgusu yapacak şekilde işaretler.
+func WithDrafts(ctx context.Context) context.Context {
+	return context.WithValue(ctx, draftContextKey{}, true)
+}
+
+func usesDrafts(ctx context.Context) bool {
+	drafts, _ := ctx.Value(draftContextKey{}).(bool)
+	return drafts
+}
+
 // sanityClient, Sanity GROQ sorgularini calistirmak icin ortak istemcidir.
-// Tum okuma sorgulari draft perspektifiyle ve varsa SANITY_TOKEN ile gonderilir;
-// boylece studyoda yayinlanmamis (draft) dokumanlar da API uzerinden gorunur olur.
 type sanityClient struct {
 	projectID string
 	token     string
@@ -49,7 +59,11 @@ func (c *sanityClient) query(ctx context.Context, query string, params map[strin
 
 	values := url.Values{}
 	values.Set("query", query)
-	values.Set("perspective", "drafts")
+	perspective := "published"
+	if usesDrafts(ctx) {
+		perspective = "drafts"
+	}
+	values.Set("perspective", perspective)
 	for key, value := range params {
 		encoded, err := json.Marshal(value)
 		if err != nil {

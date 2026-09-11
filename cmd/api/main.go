@@ -37,19 +37,35 @@ func main() {
 		return c.String(http.StatusOK, "[✅]: Sunucu başarıyla başlatıldı.")
 	})
 
-	e.GET("/api/titles", titleHandler.GetTitleDetails)
-	e.GET("/api/scan/:id", handlers.GetScanHandler)
-	e.GET("/api/list/:id", handlers.GetListHandler)
-	e.GET("/api/user/:id", handlers.GetUserHandler)
-	e.POST("/api/user", handlers.CreateUserHandler)
-	e.GET("/api/article/:slug", handlers.GetArticleHandler)
-	e.GET("/api/mangaList", handlers.GetMangaListHandler)
-	e.GET("/api/latestTitles", handlers.GetLatestTitlesHandler)
-	e.GET("/api/titlesByTag", handlers.GetTitlesByTagHandler)
-	e.GET("/api/chapter", handlers.GetChapterHandler)
-	e.GET("/api/latestChapters", handlers.GetLatestChaptersHandler)
-	e.GET("/api/localTitles", handlers.GetLocalTitlesHandler)
+	registerReadRoutes := func(group *echo.Group) {
+		group.GET("/titles", titleHandler.GetTitleDetails)
+		group.GET("/scan/:id", handlers.GetScanHandler)
+		group.GET("/list/:id", handlers.GetListHandler)
+		group.GET("/user/:id", handlers.GetUserHandler)
+		group.GET("/article/:slug", handlers.GetArticleHandler)
+		group.GET("/mangaList", handlers.GetMangaListHandler)
+		group.GET("/latestTitles", handlers.GetLatestTitlesHandler)
+		group.GET("/titlesByTag", handlers.GetTitlesByTagHandler)
+		group.GET("/chapter", handlers.GetChapterHandler)
+		group.GET("/latestChapters", handlers.GetLatestChaptersHandler)
+		group.GET("/localTitles", handlers.GetLocalTitlesHandler)
+	}
 
+	api := e.Group("/api")
+	registerReadRoutes(api)
+
+	// Draft endpoint'leri normal endpoint'lerin ayni sorgularini kullanir;
+	// middleware sadece Sanity perspektifini drafts olarak degistirir.
+	draftAPI := e.Group("/api/draft", func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			request := c.Request().WithContext(services.WithDrafts(c.Request().Context()))
+			c.SetRequest(request)
+			return next(c)
+		}
+	})
+	registerReadRoutes(draftAPI)
+
+	e.POST("/api/user", handlers.CreateUserHandler)
 
 	e.Logger.Fatal(e.Start(":2611"))
 }
