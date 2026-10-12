@@ -12,9 +12,10 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("[HATA]: .env yüklenemedi: %v", err)
+	if err := godotenv.Load(); err != nil {
+		if err := godotenv.Load("cmd/api/.env"); err != nil {
+			log.Printf("[UYARI]: .env yuklenemedi: %v", err)
+		}
 	}
 
 	jikanService := services.NewJikanService()
@@ -29,8 +30,8 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", "https://mangile.vercel.app"},
-		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-Logto-Id"},
 	}))
 
 	e.GET("/", func(c echo.Context) error {

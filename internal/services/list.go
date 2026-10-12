@@ -155,7 +155,31 @@ func CreateList(ctx context.Context, req models.CreateListRequest) (*models.List
 	}
 	_, _ = MutateSanity(ctx, []map[string]any{patchUser})
 
-	return GetList(ctx, createdListID, req.LogtoID)
+	list, err := GetList(ctx, createdListID, req.LogtoID)
+	if err == nil && list != nil && list.ID != "" {
+		return list, nil
+	}
+
+	return &models.List{
+		ID:          createdListID,
+		Type:        "lists",
+		Title:       req.Title,
+		Description: req.Description,
+		IsPrivate:   req.IsPrivate,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		User: &models.ListUser{
+			ID:       user.ID,
+			LogtoID:  user.LogtoID,
+			Name:     user.Name,
+			Username: user.Username,
+			Avatar:   user.Avatar,
+		},
+		Items:      []models.ListItem{},
+		Likes:      []models.ListUser{},
+		LikesCount: 0,
+		ItemsCount: 0,
+	}, nil
 }
 
 func UpdateList(ctx context.Context, listID string, req models.UpdateListRequest) (*models.List, error) {

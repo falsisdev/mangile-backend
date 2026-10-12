@@ -41,7 +41,7 @@ func MutateSanity(ctx context.Context, mutations []map[string]any) (*SanityMutat
 		return nil, fmt.Errorf("mutasyon govdesi hazirlanamadi: %w", err)
 	}
 
-	endpoint := fmt.Sprintf("https://%s.api.sanity.io/%s/data/mutate/%s", projectID, sanityAPIVersion, sanityDataset)
+	endpoint := fmt.Sprintf("https://%s.api.sanity.io/%s/data/mutate/%s?returnIds=true&visibility=sync", projectID, sanityAPIVersion, sanityDataset)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
