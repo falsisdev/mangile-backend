@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-// ==========================================
-// SANITY
-// ==========================================
 
 type ImageAsset struct {
 	URL string `json:"url,omitempty"`
@@ -53,9 +50,6 @@ type TitleMedia struct {
 	SanityDataMissing bool         `json:"sanity_data_missing"`
 }
 
-// ==========================================
-// JIKAN
-// ==========================================
 
 type JikanResponse struct {
 	Data JikanData `json:"data"`
@@ -73,9 +67,6 @@ type JikanData struct {
 	MalThemes        []any   `json:"themes"`
 }
 
-// ==========================================
-// ANILIST
-// ==========================================
 
 type AniListResponse struct {
 	Data AniListResultData `json:"data"`
@@ -162,9 +153,6 @@ type AniListData struct {
 	SeasonYear         int                              `json:"seasonYear"`
 }
 
-// ==========================================
-// ANILIST RECOMMENDATION
-// ==========================================
 
 type AniListRecommendationResponse struct {
 	Data AniListRecommendationData `json:"data"`

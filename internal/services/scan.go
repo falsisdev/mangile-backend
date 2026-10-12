@@ -7,7 +7,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// GetScan, verilen kimlikteki ceviri ekibini uyeleriyle birlikte dondurur.
 func GetScan(ctx context.Context, id string) (*models.Scan, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

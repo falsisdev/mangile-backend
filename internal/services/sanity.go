@@ -17,7 +17,6 @@ const (
 
 type draftContextKey struct{}
 
-// WithDrafts, context'i draft perspektifiyle Sanity sorgusu yapacak şekilde işaretler.
 func WithDrafts(ctx context.Context) context.Context {
 	return context.WithValue(ctx, draftContextKey{}, true)
 }
@@ -27,7 +26,6 @@ func usesDrafts(ctx context.Context) bool {
 	return drafts
 }
 
-// sanityClient, Sanity GROQ sorgularini calistirmak icin ortak istemcidir.
 type sanityClient struct {
 	projectID string
 	token     string
@@ -47,9 +45,6 @@ func newSanityClient() (*sanityClient, error) {
 	}, nil
 }
 
-// query, verilen GROQ sorgusunu calistirir ve "result" alanini dst'e cozumler.
-// params'taki degerler JSON'a kodlanip $<key> GROQ parametreleri olarak
-// gonderilir; boylece kullanici girisi asla sorgu metnine karismaz.
 func (c *sanityClient) query(ctx context.Context, query string, params map[string]any, dst any) error {
 	u := url.URL{
 		Scheme: "https",

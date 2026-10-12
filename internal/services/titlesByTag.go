@@ -7,9 +7,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// GetTitlesByTag, verilen etikete sahip yerel serileri (manga/lightNovel)
-// döndürür; etiket, sorgu metnine serpistirilmeden $tag GROQ parametresi
-// olarak gönderilir.
 func GetTitlesByTag(ctx context.Context, tag string) ([]models.TitleByTag, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

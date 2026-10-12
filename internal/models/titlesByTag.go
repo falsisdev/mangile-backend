@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-// TitleByTag, /api/titlesByTag yanıtındaki tek bir eseri (manga/lightNovel)
-// temsil eder.
 type TitleByTag struct {
 	ID            string     `json:"_id,omitempty"`
 	Type          string     `json:"_type,omitempty"`

@@ -15,8 +15,6 @@ import (
 
 const aniListAPIURL = "https://graphql.anilist.co"
 
-// postAniListQuery, verilen GraphQL sorgusunu degiskenleriyle AniList
-// API'sine gonderir ve yaniti dst icerisine cozumler.
 func postAniListQuery(ctx context.Context, httpClient *http.Client, query string, variables map[string]any, dst any) error {
 	requestBody, err := json.Marshal(map[string]any{
 		"query":     query,
@@ -47,7 +45,6 @@ func postAniListQuery(ctx context.Context, httpClient *http.Client, query string
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
-// AniListService, AniList GraphQL API'si uzerinden sorgu yapar.
 type AniListService struct {
 	httpClient *http.Client
 }
@@ -58,8 +55,6 @@ func NewAniListService() *AniListService {
 	}
 }
 
-// FetchDetails, verilen MAL kimligine karsilik gelen AniList manga
-// medyasini detaylariyla dondurur.
 func (s *AniListService) FetchDetails(ctx context.Context, malID int) (*models.AniListData, error) {
 	var apiResponse models.AniListResponse
 	if err := postAniListQuery(ctx, s.httpClient, queries.AniListMediaDetails, map[string]any{"idMal": malID}, &apiResponse); err != nil {

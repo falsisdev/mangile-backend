@@ -7,7 +7,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// GetArticle, verilen slug'a sahip makaleyi dondurur.
 func GetArticle(ctx context.Context, slug string) (*models.Article, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

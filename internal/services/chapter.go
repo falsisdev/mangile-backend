@@ -8,11 +8,8 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// ErrChapterNotFound, istenen bölüm dokümanı Sanity'de bulunamadığında döndürülür.
 var ErrChapterNotFound = errors.New("bölüm bulunamadı")
 
-// GetChapter, verilen kimlikteki manga/novel bölümünü, bağlı olduğu eserle ve
-// aynı eserin tüm bölümleriyle birlikte döndürür.
 func GetChapter(ctx context.Context, id string) (models.ChapterDetails, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

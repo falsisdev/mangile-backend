@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-// ChapterTitleRef, bölümün bağlı olduğu ana eserin kısa bilgisidir
-// (manga-> veya lightNovel-> dereference).
 type ChapterTitleRef struct {
 	ID            string   `json:"_id,omitempty"`
 	Type          string   `json:"_type,omitempty"`
@@ -13,8 +11,6 @@ type ChapterTitleRef struct {
 	Format        string   `json:"format,omitempty"`
 }
 
-// ChapterListItem, bölüm sayfasındaki bölüm listesindeki tek bir bölümü temsil eder
-// (aynı esere ait tüm bölümler).
 type ChapterListItem struct {
 	ID            string  `json:"_id,omitempty"`
 	Title         string  `json:"title,omitempty"`
@@ -23,8 +19,6 @@ type ChapterListItem struct {
 	Source        *Source `json:"source,omitempty"`
 }
 
-// ChapterDetails, /api/chapter yanıtındaki tek bir bölüm dokümanını temsil eder.
-// Manga bölümlerinde pages, novel bölümlerinde content dolu gelir.
 type ChapterDetails struct {
 	ID            string            `json:"_id,omitempty"`
 	Type          string            `json:"_type,omitempty"`

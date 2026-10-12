@@ -1,6 +1,5 @@
 package models
 
-// LocalTitle, /api/localTitles yanıtındaki tek bir yerel seriyi temsil eder.
 type LocalTitle struct {
 	ID           string   `json:"_id"`
 	Type         string   `json:"_type"`
@@ -16,13 +15,11 @@ type LocalTitle struct {
 	BannerImage  string   `json:"bannerImage"`
 }
 
-// LocalTitlesQueryResult, Sanity GROQ sorgusundan dönenham sonucu temsil eder.
 type LocalTitlesQueryResult struct {
 	Data  []LocalTitle `json:"data"`
 	Total int          `json:"total"`
 }
 
-// LocalTitlesResponse, /api/localTitles HTTP yanıtının yapısıdır.
 type LocalTitlesResponse struct {
 	Data  []LocalTitle `json:"data"`
 	Total int          `json:"total"`

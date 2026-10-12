@@ -7,7 +7,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// GetLatestTitles, yerel tum serileri en son eklenene gore azalan siralar.
 func GetLatestTitles(ctx context.Context) ([]models.LatestTitle, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

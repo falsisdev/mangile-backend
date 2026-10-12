@@ -1,6 +1,5 @@
 package models
 
-// LatestTitle, /api/latestTitles yanıtındaki tek bir yerel seriyi temsil eder.
 type LatestTitle struct {
 	ID          string   `json:"_id"`
 	Type        string   `json:"_type"`

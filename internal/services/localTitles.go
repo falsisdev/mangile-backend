@@ -8,7 +8,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// LocalTitlesFilter, yerel serileri sorgularken kullanılabilecek filtre ve sayfalama parametrelerini tutar.
 type LocalTitlesFilter struct {
 	Search string
 	Type   string
@@ -19,7 +18,6 @@ type LocalTitlesFilter struct {
 	Limit  int
 }
 
-// GetLocalTitles, filtreleme ve sayfalama ile Sanity veritabanından serileri çeker.
 func GetLocalTitles(ctx context.Context, filter LocalTitlesFilter) (*models.LocalTitlesResponse, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

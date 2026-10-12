@@ -3,7 +3,7 @@ package models
 type User struct {
 	ID           string         `json:"_id"`
 	LogtoID      string         `json:"logtoId"`
-	Type         string         `json:"_type"` //auth
+	Type         string         `json:"_type"`
 	CreatedAt    string         `json:"_createdAt"`
 	Avatar       string         `json:"avatar"`
 	BannerImage  string         `json:"banner"`

@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-// LatestChapterTitleRef, son yüklenen bölümün bağlı olduğu ana eserin kısa
-// bilgisidir (manga-> veya lightNovel-> dereference).
 type LatestChapterTitleRef struct {
 	ID            string     `json:"_id,omitempty"`
 	Title         string     `json:"title,omitempty"`
@@ -11,8 +9,6 @@ type LatestChapterTitleRef struct {
 	CoverImage    ImageAsset `json:"coverImage"`
 }
 
-// LatestChapter, /api/latestChapters yanıtındaki tek bir bölümü temsil eder.
-// Manga bölümlerinde manga, novel bölümlerinde lightNovel dolu gelir.
 type LatestChapter struct {
 	ID            string                 `json:"_id,omitempty"`
 	Type          string                 `json:"_type,omitempty"`

@@ -10,7 +10,6 @@ import (
 	"time"
 )
 
-// PostToSanity, verilen dokumani Sanity'ye yeni dokuman olarak olusturur.
 func PostToSanity(ctx context.Context, document map[string]any) error {
 	projectID := os.Getenv("SANITY_PROJECT_ID")
 	if projectID == "" {

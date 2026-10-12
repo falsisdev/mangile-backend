@@ -2,7 +2,7 @@ package models
 
 type Scan struct {
 	ID          string        `json:"_id"`
-	Type        string        `json:"_type"` //scan
+	Type        string        `json:"_type"`
 	Logo        string        `json:"logo"`
 	CoverImage  string        `json:"coverImage"`
 	Members     []interface{} `json:"members"`

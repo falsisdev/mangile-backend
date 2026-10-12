@@ -41,7 +41,9 @@ func main() {
 		group.GET("/titles", titleHandler.GetTitleDetails)
 		group.GET("/scan/:id", handlers.GetScanHandler)
 		group.GET("/list/:id", handlers.GetListHandler)
+		group.GET("/lists", handlers.GetPublicListsHandler)
 		group.GET("/user/:id", handlers.GetUserHandler)
+		group.GET("/user/:id/lists", handlers.GetUserListsHandler)
 		group.GET("/article/:slug", handlers.GetArticleHandler)
 		group.GET("/mangaList", handlers.GetMangaListHandler)
 		group.GET("/latestTitles", handlers.GetLatestTitlesHandler)
@@ -54,8 +56,6 @@ func main() {
 	api := e.Group("/api")
 	registerReadRoutes(api)
 
-	// Draft endpoint'leri normal endpoint'lerin ayni sorgularini kullanir;
-	// middleware sadece Sanity perspektifini drafts olarak degistirir.
 	draftAPI := e.Group("/api/draft", func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			request := c.Request().WithContext(services.WithDrafts(c.Request().Context()))
@@ -66,6 +66,14 @@ func main() {
 	registerReadRoutes(draftAPI)
 
 	e.POST("/api/user", handlers.CreateUserHandler)
+
+	api.POST("/list", handlers.CreateListHandler)
+	api.PATCH("/list/:id", handlers.UpdateListHandler)
+	api.DELETE("/list/:id", handlers.DeleteListHandler)
+	api.POST("/list/:id/items", handlers.AddListItemHandler)
+	api.DELETE("/list/:id/items/:key", handlers.RemoveListItemHandler)
+	api.PUT("/list/:id/items", handlers.UpdateListItemsHandler)
+	api.POST("/list/:id/like", handlers.ToggleLikeListHandler)
 
 	e.Logger.Fatal(e.Start(":2611"))
 }

@@ -1,0 +1,13 @@
+*[_type == "lists" && (!defined(isPrivate) || isPrivate == false)] | order(createdAt desc) [0...$limit]{
+  _id,
+  _type,
+  title,
+  description,
+  isPrivate,
+  "coverImage": coverImage{ "url": asset->url },
+  createdAt,
+  updatedAt,
+  user->{"id": _id, logtoId, name, "avatar": coalesce(avatar.asset->url, avatar), username},
+  "likesCount": count(likes),
+  "itemsCount": count(items)
+}

@@ -7,9 +7,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// GetLatestChapters, en son yüklenen 20 manga/novel bölümünü, bağlı olduğu
-// eser (manga/lightNovel) ve kaynak bilgisiyle birlikte _createdAt'e göre
-// azalan sıralı döndürür.
 func GetLatestChapters(ctx context.Context) ([]models.LatestChapter, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

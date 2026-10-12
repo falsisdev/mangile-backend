@@ -2,15 +2,39 @@
   _id,
   _type,
   title,
-  createdAt,
-  items,
   description,
-  user->{"id": _id, logtoId, name, "avatar": avatar.asset->url, username},
-  "likes": likes[]->{
+  isPrivate,
+  "coverImage": coverImage{ "url": asset->url },
+  createdAt,
+  updatedAt,
+  user->{"id": _id, logtoId, name, "avatar": coalesce(avatar.asset->url, avatar), username},
+  "likes": coalesce(likes[]->{
     "id": _id,
     name,
-    "avatar": avatar.asset->url,
+    "avatar": coalesce(avatar.asset->url, avatar),
     username,
     logtoId
-  }
+  }, []),
+  "likesCount": count(likes),
+  "items": coalesce(items[] {
+    _key,
+    index,
+    note,
+    addedAt,
+    externalId,
+    externalType,
+    "reference": reference->{
+      _id,
+      _type,
+      title,
+      "slug": slug.current,
+      coverImage{ "url": asset->url },
+      bannerImage{ "url": asset->url },
+      myAnimeListId,
+      uploadStatus,
+      format,
+      tags
+    }
+  } | order(index asc), []),
+  "itemsCount": count(items)
 }

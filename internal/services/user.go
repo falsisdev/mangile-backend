@@ -7,7 +7,6 @@ import (
 	"github.com/falsisdev/mangile-backend/internal/queries"
 )
 
-// GetUser, verilen Logto kimligine sahip kullaniciyi ve listelerini dondurur.
 func GetUser(ctx context.Context, id string) (*models.User, error) {
 	sanity, err := newSanityClient()
 	if err != nil {

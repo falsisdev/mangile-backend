@@ -78,7 +78,6 @@ func GetMangaList(ctx context.Context, filterType string, limit int, page int, s
 		BannerImage string
 	})
 
-	// Sanity zenginlestirmesi zorunlu degil; erisilemezse AniList verisiyle devam edilir.
 	if len(malIDs) > 0 {
 		if sanity, sErr := newSanityClient(); sErr == nil {
 			var localTitles []struct {
