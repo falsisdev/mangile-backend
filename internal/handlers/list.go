@@ -33,6 +33,8 @@ func handleServiceError(c echo.Context, err error) error {
 		return c.JSON(http.StatusNotFound, map[string]any{"code": 404, "message": err.Error()})
 	case errors.Is(err, services.ErrInvalidRequest):
 		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": err.Error()})
+	case errors.Is(err, services.ErrItemAlreadyExists):
+		return c.JSON(http.StatusConflict, map[string]any{"code": 409, "message": err.Error()})
 	default:
 		return c.JSON(http.StatusInternalServerError, map[string]any{"code": 500, "message": err.Error()})
 	}
@@ -252,3 +254,22 @@ func ToggleLikeListHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, list)
 }
+
+func GetLikedListsHandler(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "[HATA]: Kullanici ID'si girilmemis."})
+	}
+
+	lists, err := services.GetLikedLists(c.Request().Context(), id)
+	if err != nil {
+		return handleServiceError(c, err)
+	}
+
+	if lists == nil {
+		lists = []models.List{}
+	}
+
+	return c.JSON(http.StatusOK, lists)
+}
+

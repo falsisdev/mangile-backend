@@ -28,6 +28,11 @@ func TestEmbeddedListQueries(t *testing.T) {
 			query:    queries.UserListsQuery,
 			expected: []string{"_type == \"lists\"", "$logtoId", "$includePrivate"},
 		},
+		{
+			name:     "LikedListsQuery",
+			query:    queries.LikedListsQuery,
+			expected: []string{"_type == \"lists\"", "$logtoId", "likes"},
+		},
 	}
 
 	for _, tt := range tests {

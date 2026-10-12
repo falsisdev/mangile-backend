@@ -17,6 +17,9 @@ var PublicListsQuery string
 //go:embed userLists.groq
 var UserListsQuery string
 
+//go:embed likedLists.groq
+var LikedListsQuery string
+
 //go:embed user.groq
 var UserQuery string
 

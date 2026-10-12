@@ -1,0 +1,36 @@
+*[_type == "lists" && $logtoId in likes[]->logtoId && (!defined(isPrivate) || isPrivate == false || user->logtoId == $logtoId)] | order(createdAt desc){
+  _id,
+  _type,
+  title,
+  description,
+  isPrivate,
+  "coverImage": coverImage{ "url": asset->url },
+  createdAt,
+  updatedAt,
+  user->{"id": _id, logtoId, name, "avatar": coalesce(avatar.asset->url, avatar), username},
+  "likes": coalesce(likes[]->{
+    "id": _id,
+    name,
+    "avatar": coalesce(avatar.asset->url, avatar),
+    username,
+    logtoId
+  }, []),
+  "likesCount": count(likes),
+  "items": coalesce(items[] {
+    _key,
+    index,
+    note,
+    addedAt,
+    externalId,
+    externalType,
+    "reference": reference->{
+      _id,
+      _type,
+      title,
+      "slug": slug.current,
+      coverImage{ "url": asset->url },
+      myAnimeListId
+    }
+  } | order(index asc), []),
+  "itemsCount": count(items)
+}

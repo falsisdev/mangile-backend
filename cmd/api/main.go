@@ -45,6 +45,7 @@ func main() {
 		group.GET("/lists", handlers.GetPublicListsHandler)
 		group.GET("/user/:id", handlers.GetUserHandler)
 		group.GET("/user/:id/lists", handlers.GetUserListsHandler)
+		group.GET("/user/:id/liked-lists", handlers.GetLikedListsHandler)
 		group.GET("/article/:slug", handlers.GetArticleHandler)
 		group.GET("/mangaList", handlers.GetMangaListHandler)
 		group.GET("/latestTitles", handlers.GetLatestTitlesHandler)

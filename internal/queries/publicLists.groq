@@ -1,4 +1,4 @@
-*[_type == "lists" && (!defined(isPrivate) || isPrivate == false)] | order(createdAt desc) [0...$limit]{
+*[_type == "lists" && (!defined(isPrivate) || isPrivate == false)] | order(count(likes) desc, createdAt desc) [0...$limit]{
   _id,
   _type,
   title,
@@ -8,6 +8,30 @@
   createdAt,
   updatedAt,
   user->{"id": _id, logtoId, name, "avatar": coalesce(avatar.asset->url, avatar), username},
+  "likes": coalesce(likes[]->{
+    "id": _id,
+    name,
+    "avatar": coalesce(avatar.asset->url, avatar),
+    username,
+    logtoId
+  }, []),
   "likesCount": count(likes),
+  "items": coalesce(items[] {
+    _key,
+    index,
+    note,
+    addedAt,
+    externalId,
+    externalType,
+    "reference": reference->{
+      _id,
+      _type,
+      title,
+      "slug": slug.current,
+      coverImage{ "url": asset->url },
+      myAnimeListId
+    }
+  } | order(index asc), []),
   "itemsCount": count(items)
 }
+

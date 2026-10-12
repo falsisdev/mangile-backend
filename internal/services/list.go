@@ -13,11 +13,12 @@ import (
 )
 
 var (
-	ErrNotFound       = errors.New("liste bulunamadi")
-	ErrUnauthorized   = errors.New("bu islem icin yetkiniz bulunmuyor")
-	ErrListIsPrivate  = errors.New("bu liste gizlidir")
-	ErrUserNotFound   = errors.New("kullanici bulunamadi")
-	ErrInvalidRequest = errors.New("gecersiz istek parametreleri")
+	ErrNotFound          = errors.New("liste bulunamadi")
+	ErrUnauthorized      = errors.New("bu islem icin yetkiniz bulunmuyor")
+	ErrListIsPrivate     = errors.New("bu liste gizlidir")
+	ErrUserNotFound      = errors.New("kullanici bulunamadi")
+	ErrInvalidRequest    = errors.New("gecersiz istek parametreleri")
+	ErrItemAlreadyExists = errors.New("bu seri zaten bu listede bulunuyor")
 )
 
 func generateKey() string {
@@ -271,6 +272,15 @@ func AddListItem(ctx context.Context, listID string, req models.AddListItemReque
 		return nil, ErrUnauthorized
 	}
 
+	for _, it := range existing.Items {
+		if req.ReferenceID != nil && *req.ReferenceID != "" && it.Reference != nil && it.Reference.ID == *req.ReferenceID {
+			return nil, ErrItemAlreadyExists
+		}
+		if req.ExternalID != nil && *req.ExternalID != 0 && it.ExternalID != nil && *it.ExternalID == *req.ExternalID {
+			return nil, ErrItemAlreadyExists
+		}
+	}
+
 	index := len(existing.Items) + 1
 	if req.Index != nil {
 		index = *req.Index
@@ -480,4 +490,25 @@ func ToggleLikeList(ctx context.Context, listID string, logtoID string) (*models
 	}
 
 	return GetList(ctx, listID, logtoID)
+}
+
+func GetLikedLists(ctx context.Context, logtoID string) ([]models.List, error) {
+	if logtoID == "" {
+		return nil, ErrInvalidRequest
+	}
+
+	sanity, err := newSanityClient()
+	if err != nil {
+		return nil, err
+	}
+
+	var lists []models.List
+	params := map[string]any{
+		"logtoId": logtoID,
+	}
+	if err := sanity.query(ctx, queries.LikedListsQuery, params, &lists); err != nil {
+		return nil, err
+	}
+
+	return lists, nil
 }
