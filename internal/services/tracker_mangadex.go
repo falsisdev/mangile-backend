@@ -41,11 +41,90 @@ func NewMangaDexTrackerService() *MangaDexTrackerService {
 	}
 }
 
+func (s *MangaDexTrackerService) LoginWithCredentials(ctx context.Context, username, password string) (*MangaDexOAuthTokenResponse, error) {
+	clientID := os.Getenv("MANGADEX_CLIENT_ID")
+	clientSecret := os.Getenv("MANGADEX_CLIENT_SECRET")
+
+	data := url.Values{}
+	data.Set("grant_type", "password")
+	data.Set("client_id", clientID)
+	data.Set("client_secret", clientSecret)
+	data.Set("username", username)
+	data.Set("password", password)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, mangaDexAuthBase+"/token", strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", "Mangile/1.0")
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("MangaDex baglantisi basarisiz: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		var errData struct {
+			Error            string `json:"error"`
+			ErrorDescription string `json:"error_description"`
+		}
+		if json.Unmarshal(body, &errData) == nil && errData.ErrorDescription != "" {
+			return nil, fmt.Errorf("MangaDex: %s", errData.ErrorDescription)
+		}
+		return nil, fmt.Errorf("MangaDex giris hatasi (kod %d): %s", resp.StatusCode, string(body))
+	}
+
+	var tokenResp MangaDexOAuthTokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+		return nil, err
+	}
+	return &tokenResp, nil
+}
+
+func (s *MangaDexTrackerService) GetLoggedUser(ctx context.Context, accessToken string) (userID, username string, err error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, mangaDexAPIBase+"/user/me", nil)
+	if err != nil {
+		return "", "", err
+	}
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("User-Agent", "Mangile/1.0")
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return "", "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", "", fmt.Errorf("MangaDex kullanici bilgisi alinamadi (%d)", resp.StatusCode)
+	}
+
+	var userRes struct {
+		Data struct {
+			ID         string `json:"id"`
+			Attributes struct {
+				Username string `json:"username"`
+			} `json:"attributes"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&userRes); err != nil {
+		return "", "", err
+	}
+	return userRes.Data.ID, userRes.Data.Attributes.Username, nil
+}
+
 func (s *MangaDexTrackerService) GetAuthorizationURL(state string) string {
 	clientID := os.Getenv("MANGADEX_CLIENT_ID")
 	redirectURI := os.Getenv("MANGADEX_REDIRECT_URI")
 	if redirectURI == "" {
-		redirectURI = "https://mangile.vercel.app/api/sync/oauth/mangadex/callback"
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+		redirectURI = fmt.Sprintf("%s/auth/mangadex/callback", frontendURL)
 	}
 
 	params := url.Values{}
@@ -63,7 +142,11 @@ func (s *MangaDexTrackerService) ExchangeCode(ctx context.Context, code string) 
 	clientSecret := os.Getenv("MANGADEX_CLIENT_SECRET")
 	redirectURI := os.Getenv("MANGADEX_REDIRECT_URI")
 	if redirectURI == "" {
-		redirectURI = "https://mangile.vercel.app/api/sync/oauth/mangadex/callback"
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+		redirectURI = fmt.Sprintf("%s/auth/mangadex/callback", frontendURL)
 	}
 
 	data := url.Values{}

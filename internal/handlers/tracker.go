@@ -3,6 +3,8 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -210,18 +212,27 @@ func (h *TrackerHandler) OAuthInitiateHandler(c echo.Context) error {
 	}
 }
 
+func getFrontendURL() string {
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+	return strings.TrimRight(frontendURL, "/")
+}
+
 func (h *TrackerHandler) OAuthCallbackHandler(c echo.Context) error {
 	provider := strings.ToLower(c.Param("provider"))
 	code := c.QueryParam("code")
 	state := c.QueryParam("state")
+	frontendURL := getFrontendURL()
 
 	if code == "" || state == "" {
-		return c.Redirect(http.StatusTemporaryRedirect, "https://mangile.vercel.app/sync?error=missing_code")
+		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?error=missing_code", frontendURL))
 	}
 
 	parts := strings.Split(state, ":")
 	if len(parts) < 2 {
-		return c.Redirect(http.StatusTemporaryRedirect, "https://mangile.vercel.app/sync?error=invalid_state")
+		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?error=invalid_state", frontendURL))
 	}
 	logtoID := parts[1]
 
@@ -236,7 +247,7 @@ func (h *TrackerHandler) OAuthCallbackHandler(c echo.Context) error {
 		}
 		tokenResp, err := h.malService.ExchangeCode(ctx, code, codeVerifier)
 		if err != nil {
-			return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("https://mangile.vercel.app/sync?error=%s", err.Error()))
+			return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?error=%s", frontendURL, url.QueryEscape(err.Error())))
 		}
 		expiresAt := time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second).UTC().Format(time.RFC3339)
 		patchSet = map[string]any{
@@ -252,7 +263,7 @@ func (h *TrackerHandler) OAuthCallbackHandler(c echo.Context) error {
 	case "anilist":
 		tokenResp, err := h.aniListService.ExchangeCode(ctx, code)
 		if err != nil {
-			return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("https://mangile.vercel.app/sync?error=%s", err.Error()))
+			return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?error=%s", frontendURL, url.QueryEscape(err.Error())))
 		}
 		patchSet = map[string]any{
 			"integrations.anilist": map[string]any{
@@ -265,7 +276,7 @@ func (h *TrackerHandler) OAuthCallbackHandler(c echo.Context) error {
 	case "mangadex":
 		tokenResp, err := h.mangaDexService.ExchangeCode(ctx, code)
 		if err != nil {
-			return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("https://mangile.vercel.app/sync?error=%s", err.Error()))
+			return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?error=%s", frontendURL, url.QueryEscape(err.Error())))
 		}
 		expiresAt := time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second).UTC().Format(time.RFC3339)
 		patchSet = map[string]any{
@@ -279,15 +290,70 @@ func (h *TrackerHandler) OAuthCallbackHandler(c echo.Context) error {
 		}
 
 	default:
-		return c.Redirect(http.StatusTemporaryRedirect, "https://mangile.vercel.app/sync?error=unknown_provider")
+		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?error=unknown_provider", frontendURL))
 	}
 
 	// Update user's auth document with tokens
 	if err := h.syncService.SaveUserIntegration(ctx, logtoID, patchSet); err != nil {
-		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("https://mangile.vercel.app/sync?error=%s", err.Error()))
+		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?error=%s", frontendURL, url.QueryEscape(err.Error())))
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("https://mangile.vercel.app/sync?connected=%s", provider))
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/sync?connected=%s", frontendURL, provider))
+}
+
+type ConnectMangaDexRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (h *TrackerHandler) ConnectMangaDexHandler(c echo.Context) error {
+	targetLogtoID := c.Param("id")
+	viewerLogtoID := getLogtoIDFromContext(c, "")
+	if viewerLogtoID == "" || viewerLogtoID != targetLogtoID {
+		return c.JSON(http.StatusForbidden, map[string]any{"code": 403, "message": "Yetkisiz islem."})
+	}
+
+	var req ConnectMangaDexRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "Gecersiz istek govdesi."})
+	}
+	if req.Username == "" || req.Password == "" {
+		return c.JSON(http.StatusBadRequest, map[string]any{"code": 400, "message": "Kullanici adi ve sifre zorunludur."})
+	}
+
+	ctx := c.Request().Context()
+	tokenResp, err := h.mangaDexService.LoginWithCredentials(ctx, req.Username, req.Password)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{"code": 401, "message": err.Error()})
+	}
+
+	userID, username, _ := h.mangaDexService.GetLoggedUser(ctx, tokenResp.AccessToken)
+	if username == "" {
+		username = req.Username
+	}
+
+	expiresAt := time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second).UTC().Format(time.RFC3339)
+	patchSet := map[string]any{
+		"integrations.mangadex": map[string]any{
+			"accessToken":  tokenResp.AccessToken,
+			"refreshToken": tokenResp.RefreshToken,
+			"expiresAt":    expiresAt,
+			"userId":       userID,
+			"username":     username,
+			"connectedAt":  time.Now().UTC().Format(time.RFC3339),
+			"lastSyncAt":   time.Now().UTC().Format(time.RFC3339),
+		},
+	}
+
+	if err := h.syncService.SaveUserIntegration(ctx, targetLogtoID, patchSet); err != nil {
+		return handleServiceError(c, err)
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"success":  true,
+		"message":  "MangaDex hesabi basariyla baglandi.",
+		"username": username,
+	})
 }
 
 func (h *TrackerHandler) DisconnectIntegrationHandler(c echo.Context) error {

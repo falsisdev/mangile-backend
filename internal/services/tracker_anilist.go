@@ -42,7 +42,11 @@ func (s *AniListTrackerService) GetAuthorizationURL(state string) string {
 	clientID := os.Getenv("ANILIST_CLIENT_ID")
 	redirectURI := os.Getenv("ANILIST_REDIRECT_URI")
 	if redirectURI == "" {
-		redirectURI = "https://mangile.vercel.app/api/sync/oauth/anilist/callback"
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+		redirectURI = fmt.Sprintf("%s/auth/anilist/callback", frontendURL)
 	}
 
 	params := url.Values{}
@@ -59,7 +63,11 @@ func (s *AniListTrackerService) ExchangeCode(ctx context.Context, code string) (
 	clientSecret := os.Getenv("ANILIST_CLIENT_SECRET")
 	redirectURI := os.Getenv("ANILIST_REDIRECT_URI")
 	if redirectURI == "" {
-		redirectURI = "https://mangile.vercel.app/api/sync/oauth/anilist/callback"
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+		redirectURI = fmt.Sprintf("%s/auth/anilist/callback", frontendURL)
 	}
 
 	data := url.Values{}

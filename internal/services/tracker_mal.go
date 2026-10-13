@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -63,11 +62,12 @@ func GeneratePKCE() (verifier, challenge string, err error) {
 	if _, err := rand.Read(bytes); err != nil {
 		return "", "", err
 	}
-	// Plain base64-url without padding as per PKCE RFC
 	verifier = base64.RawURLEncoding.EncodeToString(bytes)
-	// MAL supports plain or s256 (code_challenge_method=plain is standard for MAL, but s256 works too)
-	h := sha256.Sum256([]byte(verifier))
-	challenge = base64.RawURLEncoding.EncodeToString(h[:])
+	if len(verifier) > 128 {
+		verifier = verifier[:128]
+	}
+	// For MAL OAuth2 PKCE plain method, challenge must match verifier character-for-character
+	challenge = verifier
 	return verifier, challenge, nil
 }
 
@@ -75,7 +75,11 @@ func (s *MALService) GetAuthorizationURL(state, codeChallenge string) string {
 	clientID := os.Getenv("MAL_CLIENT_ID")
 	redirectURI := os.Getenv("MAL_REDIRECT_URI")
 	if redirectURI == "" {
-		redirectURI = "https://mangile.vercel.app/api/sync/oauth/mal/callback"
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+		redirectURI = fmt.Sprintf("%s/auth/mal/callback", frontendURL)
 	}
 
 	params := url.Values{}
@@ -94,7 +98,11 @@ func (s *MALService) ExchangeCode(ctx context.Context, code, codeVerifier string
 	clientSecret := os.Getenv("MAL_CLIENT_SECRET")
 	redirectURI := os.Getenv("MAL_REDIRECT_URI")
 	if redirectURI == "" {
-		redirectURI = "https://mangile.vercel.app/api/sync/oauth/mal/callback"
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+		redirectURI = fmt.Sprintf("%s/auth/mal/callback", frontendURL)
 	}
 
 	data := url.Values{}

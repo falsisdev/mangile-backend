@@ -99,6 +99,7 @@ func main() {
 
 	api.GET("/sync/oauth/:provider/url", trackerHandler.OAuthInitiateHandler)
 	api.GET("/sync/oauth/:provider/callback", trackerHandler.OAuthCallbackHandler)
+	api.POST("/user/:id/integrations/mangadex", trackerHandler.ConnectMangaDexHandler)
 	api.DELETE("/user/:id/integrations/:provider", trackerHandler.DisconnectIntegrationHandler)
 
 	e.Logger.Fatal(e.Start(":2611"))
