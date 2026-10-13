@@ -1,0 +1,12 @@
+*[_type == "readingHistory" && user->logtoId == $logtoId][0]{
+  _id,
+  _type,
+  updatedAt,
+  items,
+  "user": user->{
+    "id": _id,
+    logtoId,
+    name,
+    username
+  }
+}

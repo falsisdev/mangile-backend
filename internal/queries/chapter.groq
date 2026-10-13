@@ -16,11 +16,19 @@
     myAnimeListId,
     title,
     tags,
-    format
+    format,
+    "coverImage": {
+      "url": coverImage.asset->url
+    }
   },
   lightNovel->{
+    _id,
+    _type,
     myAnimeListId,
-    title
+    title,
+    "coverImage": {
+      "url": coverImage.asset->url
+    }
   },
   source->{
     _id,

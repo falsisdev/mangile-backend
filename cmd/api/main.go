@@ -77,5 +77,11 @@ func main() {
 	api.PUT("/list/:id/items", handlers.UpdateListItemsHandler)
 	api.POST("/list/:id/like", handlers.ToggleLikeListHandler)
 
+	api.GET("/user/:id/history", handlers.GetHistoryHandler)
+	api.POST("/user/:id/history", handlers.UpsertHistoryHandler)
+	api.DELETE("/user/:id/history/:seriesId", handlers.DeleteHistoryItemHandler)
+	api.DELETE("/user/:id/history", handlers.ClearHistoryHandler)
+	api.POST("/user/:id/history/sync", handlers.SyncHistoryHandler)
+
 	e.Logger.Fatal(e.Start(":2611"))
 }

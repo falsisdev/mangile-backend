@@ -23,6 +23,9 @@ var LikedListsQuery string
 //go:embed user.groq
 var UserQuery string
 
+//go:embed history.groq
+var HistoryQuery string
+
 //go:embed article.groq
 var ArticleQuery string
 

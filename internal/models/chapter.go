@@ -8,7 +8,8 @@ type ChapterTitleRef struct {
 	MyAnimeListID int      `json:"myAnimeListId,omitempty"`
 	Title         string   `json:"title,omitempty"`
 	Tags          []string `json:"tags,omitempty"`
-	Format        string   `json:"format,omitempty"`
+	Format        string      `json:"format,omitempty"`
+	CoverImage    *ImageAsset `json:"coverImage,omitempty"`
 }
 
 type ChapterListItem struct {
