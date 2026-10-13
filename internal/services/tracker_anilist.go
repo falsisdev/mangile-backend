@@ -175,11 +175,33 @@ query ($search: String) {
 	return out, nil
 }
 
-func (s *AniListTrackerService) GetUserMangaStatus(ctx context.Context, accessToken string, aniListID int) (*models.TrackerStatus, error) {
+func (s *AniListTrackerService) ResolveMediaIDByMALID(ctx context.Context, malID int) (int, error) {
+	if malID <= 0 {
+		return 0, fmt.Errorf("gecersiz MAL ID")
+	}
+	const q = `query ($idMal: Int) { Media(idMal: $idMal, type: MANGA) { id } }`
+	var result struct {
+		Data struct {
+			Media *struct {
+				ID int `json:"id"`
+			} `json:"Media"`
+		} `json:"data"`
+	}
+	if err := postAniListQuery(ctx, s.httpClient, q, map[string]any{"idMal": malID}, &result); err != nil {
+		return 0, err
+	}
+	if result.Data.Media == nil || result.Data.Media.ID == 0 {
+		return 0, fmt.Errorf("AniList serisi bulunamadi")
+	}
+	return result.Data.Media.ID, nil
+}
+
+func (s *AniListTrackerService) GetUserMangaStatus(ctx context.Context, accessToken string, aniListID int, malID int) (*models.TrackerStatus, error) {
 	const statusGraphQL = `
-query ($mediaId: Int) {
-  Media(id: $mediaId, type: MANGA) {
+query ($mediaId: Int, $idMal: Int) {
+  Media(id: $mediaId, idMal: $idMal, type: MANGA) {
     id
+    idMal
     title {
       romaji
       english
@@ -198,11 +220,18 @@ query ($mediaId: Int) {
   }
 }`
 
+	variables := map[string]any{}
+	if aniListID > 0 {
+		variables["mediaId"] = aniListID
+	} else if malID > 0 {
+		variables["idMal"] = malID
+	} else {
+		return nil, fmt.Errorf("aniListID veya malID belirtilmelidir")
+	}
+
 	reqBody, err := json.Marshal(map[string]any{
-		"query": statusGraphQL,
-		"variables": map[string]any{
-			"mediaId": aniListID,
-		},
+		"query":     statusGraphQL,
+		"variables": variables,
 	})
 	if err != nil {
 		return nil, err
@@ -213,6 +242,7 @@ query ($mediaId: Int) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Mangile/1.0 (https://mangile.org)")
 	if accessToken != "" {
 		req.Header.Set("Authorization", "Bearer "+accessToken)
 	}
@@ -225,8 +255,9 @@ query ($mediaId: Int) {
 
 	var apiRes struct {
 		Data struct {
-			Media struct {
+			Media *struct {
 				ID    int `json:"id"`
+				IDMal int `json:"idMal"`
 				Title struct {
 					Romaji  string `json:"romaji"`
 					English string `json:"english"`
@@ -244,10 +275,22 @@ query ($mediaId: Int) {
 				} `json:"mediaListEntry"`
 			} `json:"Media"`
 		} `json:"data"`
+		Errors []struct {
+			Message string `json:"message"`
+			Status  int    `json:"status"`
+		} `json:"errors"`
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&apiRes); err != nil {
 		return nil, err
+	}
+
+	if len(apiRes.Errors) > 0 && apiRes.Data.Media == nil {
+		return nil, fmt.Errorf("AniList hatasi: %s", apiRes.Errors[0].Message)
+	}
+
+	if apiRes.Data.Media == nil || apiRes.Data.Media.ID == 0 {
+		return nil, fmt.Errorf("AniList serisi bulunamadi")
 	}
 
 	m := apiRes.Data.Media
@@ -317,6 +360,7 @@ mutation ($mediaId: Int, $status: MediaListStatus, $progress: Int, $score: Float
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Mangile/1.0 (https://mangile.org)")
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	resp, err := s.httpClient.Do(req)

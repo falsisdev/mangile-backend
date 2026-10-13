@@ -163,11 +163,6 @@ func (s *TrackerSyncService) GetSeriesLiveStatus(ctx context.Context, logtoID, s
 		autoSync = userItem.AutoSync
 	}
 
-	// If AniList ID is not set but MAL ID is known, AniList matches MAL ID via idMal
-	if targetAniList == 0 && targetMAL > 0 {
-		targetAniList = targetMAL // AniList can resolve idMal or fetchDetails
-	}
-
 	result := &models.SeriesAllTrackersStatus{
 		SeriesID: seriesID,
 		AutoSync: autoSync,
@@ -206,9 +201,8 @@ func (s *TrackerSyncService) GetSeriesLiveStatus(ctx context.Context, logtoID, s
 			Provider:    "anilist",
 			IsConnected: integrations.AniList.AccessToken != "",
 		}
-		if targetAniList > 0 {
-			st.MatchedID = strconv.Itoa(targetAniList)
-			if live, err := s.aniListService.GetUserMangaStatus(ctx, integrations.AniList.AccessToken, targetAniList); err == nil {
+		if targetAniList > 0 || targetMAL > 0 {
+			if live, err := s.aniListService.GetUserMangaStatus(ctx, integrations.AniList.AccessToken, targetAniList, targetMAL); err == nil {
 				st = live
 			}
 		}
@@ -429,7 +423,15 @@ func (s *TrackerSyncService) UpdateSingleTracker(ctx context.Context, req models
 		}
 		return s.malService.UpdateUserMangaStatus(ctx, integrations.MAL.AccessToken, targetMAL, req.Status, req.Chapter, req.Score)
 	case "anilist":
-		if integrations.AniList.AccessToken == "" || targetAniList == 0 {
+		if integrations.AniList.AccessToken == "" {
+			return fmt.Errorf("AniList hesabi bagli degil")
+		}
+		if targetAniList == 0 && targetMAL > 0 {
+			if resolvedID, err := s.aniListService.ResolveMediaIDByMALID(ctx, targetMAL); err == nil && resolvedID > 0 {
+				targetAniList = resolvedID
+			}
+		}
+		if targetAniList == 0 {
 			return fmt.Errorf("AniList hesabi bagli degil veya seri eslesmemis")
 		}
 		return s.aniListService.UpdateUserMangaStatus(ctx, integrations.AniList.AccessToken, targetAniList, req.Status, req.Chapter, req.Score)
@@ -505,14 +507,22 @@ func (s *TrackerSyncService) SyncSeriesProgress(ctx context.Context, req models.
 		}
 
 		// AniList Sync
-		if integrations.AniList.AccessToken != "" && targetAniList > 0 {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				if err := s.aniListService.UpdateUserMangaStatus(bgCtx, integrations.AniList.AccessToken, targetAniList, status, req.ChapterNumber, -1); err != nil {
-					log.Printf("[Sync AniList Hatasi]: %v", err)
+		if integrations.AniList.AccessToken != "" && (targetAniList > 0 || targetMAL > 0) {
+			effectiveAniList := targetAniList
+			if effectiveAniList == 0 && targetMAL > 0 {
+				if resolvedID, err := s.aniListService.ResolveMediaIDByMALID(bgCtx, targetMAL); err == nil && resolvedID > 0 {
+					effectiveAniList = resolvedID
 				}
-			}()
+			}
+			if effectiveAniList > 0 {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					if err := s.aniListService.UpdateUserMangaStatus(bgCtx, integrations.AniList.AccessToken, effectiveAniList, status, req.ChapterNumber, -1); err != nil {
+						log.Printf("[Sync AniList Hatasi]: %v", err)
+					}
+				}()
+			}
 		}
 
 		// MangaDex Sync
