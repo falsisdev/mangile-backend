@@ -77,11 +77,29 @@ func main() {
 	api.PUT("/list/:id/items", handlers.UpdateListItemsHandler)
 	api.POST("/list/:id/like", handlers.ToggleLikeListHandler)
 
+	trackerSyncService := services.NewTrackerSyncService()
+	malService := services.NewMALService()
+	aniListTrackerService := services.NewAniListTrackerService()
+	mangaDexService := services.NewMangaDexTrackerService()
+	trackerHandler := handlers.NewTrackerHandler(trackerSyncService, malService, aniListTrackerService, mangaDexService)
+
 	api.GET("/user/:id/history", handlers.GetHistoryHandler)
 	api.POST("/user/:id/history", handlers.UpsertHistoryHandler)
 	api.DELETE("/user/:id/history/:seriesId", handlers.DeleteHistoryItemHandler)
 	api.DELETE("/user/:id/history", handlers.ClearHistoryHandler)
 	api.POST("/user/:id/history/sync", handlers.SyncHistoryHandler)
+
+	api.GET("/user/:id/trackers", trackerHandler.GetTrackersHandler)
+	api.GET("/user/:id/trackers/:seriesId/status", trackerHandler.GetSeriesTrackerStatusHandler)
+	api.POST("/user/:id/trackers/bind", trackerHandler.BindTrackerHandler)
+	api.DELETE("/user/:id/trackers/:seriesId/:provider", trackerHandler.UnbindTrackerHandler)
+	api.POST("/user/:id/trackers/update", trackerHandler.UpdateTrackerStatusHandler)
+	api.POST("/user/:id/trackers/progress", trackerHandler.SyncTrackerProgressHandler)
+	api.GET("/tracker/search", trackerHandler.SearchTrackerTitlesHandler)
+
+	api.GET("/sync/oauth/:provider/url", trackerHandler.OAuthInitiateHandler)
+	api.GET("/sync/oauth/:provider/callback", trackerHandler.OAuthCallbackHandler)
+	api.DELETE("/user/:id/integrations/:provider", trackerHandler.DisconnectIntegrationHandler)
 
 	e.Logger.Fatal(e.Start(":2611"))
 }
