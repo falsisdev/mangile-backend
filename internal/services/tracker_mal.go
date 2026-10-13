@@ -71,6 +71,18 @@ func GeneratePKCE() (verifier, challenge string, err error) {
 	return verifier, challenge, nil
 }
 
+func (s *MALService) getRedirectURI() string {
+	redirectURI := os.Getenv("MAL_REDIRECT_URI")
+	if redirectURI == "" {
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+		redirectURI = fmt.Sprintf("%s/api/integrations/mal-callback", frontendURL)
+	}
+	return redirectURI
+}
+
 func (s *MALService) GetAuthorizationURL(state, codeChallenge string) string {
 	clientID := os.Getenv("MAL_CLIENT_ID")
 
@@ -80,6 +92,7 @@ func (s *MALService) GetAuthorizationURL(state, codeChallenge string) string {
 	params.Set("state", state)
 	params.Set("code_challenge", codeChallenge)
 	params.Set("code_challenge_method", "plain")
+	params.Set("redirect_uri", s.getRedirectURI())
 
 	return fmt.Sprintf("%s?%s", malAuthURL, params.Encode())
 }
@@ -87,14 +100,7 @@ func (s *MALService) GetAuthorizationURL(state, codeChallenge string) string {
 func (s *MALService) ExchangeCode(ctx context.Context, code, codeVerifier string) (*MALOAuthTokenResponse, error) {
 	clientID := os.Getenv("MAL_CLIENT_ID")
 	clientSecret := os.Getenv("MAL_CLIENT_SECRET")
-	redirectURI := os.Getenv("MAL_REDIRECT_URI")
-	if redirectURI == "" {
-		frontendURL := os.Getenv("FRONTEND_URL")
-		if frontendURL == "" {
-			frontendURL = "http://localhost:3000"
-		}
-		redirectURI = fmt.Sprintf("%s/api/integrations/mal-callback", frontendURL)
-	}
+	redirectURI := s.getRedirectURI()
 
 	data := url.Values{}
 	data.Set("client_id", clientID)
