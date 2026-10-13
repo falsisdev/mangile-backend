@@ -73,14 +73,6 @@ func GeneratePKCE() (verifier, challenge string, err error) {
 
 func (s *MALService) GetAuthorizationURL(state, codeChallenge string) string {
 	clientID := os.Getenv("MAL_CLIENT_ID")
-	redirectURI := os.Getenv("MAL_REDIRECT_URI")
-	if redirectURI == "" {
-		frontendURL := os.Getenv("FRONTEND_URL")
-		if frontendURL == "" {
-			frontendURL = "http://localhost:3000"
-		}
-		redirectURI = fmt.Sprintf("%s/auth/mal/callback", frontendURL)
-	}
 
 	params := url.Values{}
 	params.Set("response_type", "code")
@@ -88,7 +80,6 @@ func (s *MALService) GetAuthorizationURL(state, codeChallenge string) string {
 	params.Set("state", state)
 	params.Set("code_challenge", codeChallenge)
 	params.Set("code_challenge_method", "plain")
-	params.Set("redirect_uri", redirectURI)
 
 	return fmt.Sprintf("%s?%s", malAuthURL, params.Encode())
 }
