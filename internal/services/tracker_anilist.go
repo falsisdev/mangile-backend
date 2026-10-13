@@ -46,7 +46,7 @@ func (s *AniListTrackerService) GetAuthorizationURL(state string) string {
 		if frontendURL == "" {
 			frontendURL = "http://localhost:3000"
 		}
-		redirectURI = fmt.Sprintf("%s/auth/anilist/callback", frontendURL)
+		redirectURI = fmt.Sprintf("%s/api/integrations/anilist-callback", frontendURL)
 	}
 
 	params := url.Values{}
@@ -67,7 +67,7 @@ func (s *AniListTrackerService) ExchangeCode(ctx context.Context, code string) (
 		if frontendURL == "" {
 			frontendURL = "http://localhost:3000"
 		}
-		redirectURI = fmt.Sprintf("%s/auth/anilist/callback", frontendURL)
+		redirectURI = fmt.Sprintf("%s/api/integrations/anilist-callback", frontendURL)
 	}
 
 	data := url.Values{}

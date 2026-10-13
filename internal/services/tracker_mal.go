@@ -93,7 +93,7 @@ func (s *MALService) ExchangeCode(ctx context.Context, code, codeVerifier string
 		if frontendURL == "" {
 			frontendURL = "http://localhost:3000"
 		}
-		redirectURI = fmt.Sprintf("%s/auth/mal/callback", frontendURL)
+		redirectURI = fmt.Sprintf("%s/api/integrations/mal-callback", frontendURL)
 	}
 
 	data := url.Values{}

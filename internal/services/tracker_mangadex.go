@@ -124,7 +124,7 @@ func (s *MangaDexTrackerService) GetAuthorizationURL(state string) string {
 		if frontendURL == "" {
 			frontendURL = "http://localhost:3000"
 		}
-		redirectURI = fmt.Sprintf("%s/auth/mangadex/callback", frontendURL)
+		redirectURI = fmt.Sprintf("%s/api/integrations/mangadex-callback", frontendURL)
 	}
 
 	params := url.Values{}
@@ -146,7 +146,7 @@ func (s *MangaDexTrackerService) ExchangeCode(ctx context.Context, code string) 
 		if frontendURL == "" {
 			frontendURL = "http://localhost:3000"
 		}
-		redirectURI = fmt.Sprintf("%s/auth/mangadex/callback", frontendURL)
+		redirectURI = fmt.Sprintf("%s/api/integrations/mangadex-callback", frontendURL)
 	}
 
 	data := url.Values{}
