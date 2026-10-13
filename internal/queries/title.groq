@@ -17,15 +17,13 @@
   format,
   title,
   uploadStatus,
+  isCopyrighted,
   "chapters": *[(_type == "mangaChapter" || _type == "novelChapter") && (manga._ref == ^._id || manga->myAnimeListId == $malId || lightNovel._ref == ^._id || lightNovel->myAnimeListId == $malId)] | order(chapterNumber asc) {
     _createdAt,
     _id,
     title,
     chapterNumber,
     volumeNumber,
-    pages[] {
-      "url": asset->url
-    },
     source->{
       _id,
       _type,

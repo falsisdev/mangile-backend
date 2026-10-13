@@ -22,5 +22,12 @@ func GetChapterHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
+	viewerLogtoID := getLogtoIDFromContext(c, "")
+	isCopyrighted := (chapter.Manga != nil && chapter.Manga.IsCopyrighted) || (chapter.LightNovel != nil && chapter.LightNovel.IsCopyrighted)
+	if isCopyrighted && viewerLogtoID == "" {
+		chapter.Pages = nil
+		chapter.Content = nil
+	}
+
 	return c.JSON(http.StatusOK, chapter)
 }

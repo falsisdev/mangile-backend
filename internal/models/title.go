@@ -42,6 +42,7 @@ type TitleMedia struct {
 	Notes             []any        `json:"notes,omitempty"`
 	Tags              []string     `json:"tags,omitempty"`
 	Format            string       `json:"format,omitempty"`
+	IsCopyrighted     bool         `json:"isCopyrighted"`
 	BannerImage       ImageAsset   `json:"bannerImage"`
 	CoverImage        ImageAsset   `json:"coverImage"`
 	Chapters          []Chapter    `json:"chapters,omitempty"`

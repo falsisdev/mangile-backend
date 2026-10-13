@@ -17,6 +17,7 @@
     title,
     tags,
     format,
+    isCopyrighted,
     "coverImage": {
       "url": coverImage.asset->url
     }
@@ -26,6 +27,7 @@
     _type,
     myAnimeListId,
     title,
+    isCopyrighted,
     "coverImage": {
       "url": coverImage.asset->url
     }
