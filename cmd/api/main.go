@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/falsisdev/mangile-backend/internal/handlers"
 	"github.com/falsisdev/mangile-backend/internal/services"
@@ -26,10 +27,15 @@ func main() {
 
 	e := echo.New()
 
+	allowOrigins := []string{"http://localhost:3000", "https://mangile.vercel.app", "https://mangile.org"}
+	if fe := os.Getenv("FRONTEND_URL"); fe != "" {
+		allowOrigins = append(allowOrigins, fe)
+	}
+
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000", "https://mangile.vercel.app"},
+		AllowOrigins: allowOrigins,
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-Logto-Id"},
 	}))
