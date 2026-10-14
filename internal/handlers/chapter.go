@@ -27,6 +27,7 @@ func GetChapterHandler(c echo.Context) error {
 	if isCopyrighted && viewerLogtoID == "" {
 		chapter.Pages = nil
 		chapter.Content = nil
+		chapter.Chapters = nil
 	}
 
 	return c.JSON(http.StatusOK, chapter)
