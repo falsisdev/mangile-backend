@@ -27,7 +27,7 @@ func main() {
 
 	e := echo.New()
 
-	allowOrigins := []string{"http://localhost:3000", "https://mangile.vercel.app", "https://mangile.org"}
+	allowOrigins := []string{"http://localhost:3000", "https://mangile.vercel.app", "https://mangile.netlify.app"}
 	if fe := os.Getenv("FRONTEND_URL"); fe != "" {
 		allowOrigins = append(allowOrigins, fe)
 	}
